@@ -56,4 +56,25 @@ class Classifications
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function getByCode($code)
+    {
+        $stmt = $this->db->connect()->prepare("SELECT * FROM {$this->table} WHERE code = ? LIMIT 1");
+        $stmt->execute([$code]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Get a single classification by ID
+     * Used for duplicate org_id error handling
+     * 
+     * @param int $id Classification ID
+     * @return array|false Classification data or false if not found
+     */
+    public function get($id)
+    {
+        $stmt = $this->db->connect()->prepare("SELECT * FROM {$this->table} WHERE id = :id LIMIT 1");
+        $stmt->execute([':id' => $id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
 }

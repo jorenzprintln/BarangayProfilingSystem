@@ -50,7 +50,7 @@ class PDF extends FPDF
         $this->MultiCell($this->w, 10, '', 0, 'J');
         $this->Write(10, '           THIS IS TO CERTIFY that ');
         $this->SetFont('Times', 'B', 12);
-        $this->Write(10, strtoupper($constituent['first_name'] . ' ' . $constituent['middle_name'] . ' ' . $constituent['last_name']));
+        $this->Write(10, strtoupper($constituent['first_name'] . ' ' . $constituent['middle_name'] . ' ' . $constituent['last_name'] . ' ' . ($constituent['suffix'] ?? '')));
         $this->SetFont('Times', '', 12);
         $this->Write(10, ', of legal age, Filipino, is a bonafide resident of Barangay 36-A, Imelda Village, Tacloban City, Leyte, is personally known to me and is of ');
         $this->SetFont('Times', 'B', 12);
@@ -74,10 +74,18 @@ class PDF extends FPDF
 
         $this->Ln(30);
         
+        // FIXED: Extract and display Punong Barangay name on the right
+        $punongBarangayName = '';
+        if (is_array($punongBarangay) && isset($punongBarangay['full_name'])) {
+            $punongBarangayName = strtoupper($punongBarangay['full_name']);
+        } elseif (is_string($punongBarangay)) {
+            $punongBarangayName = strtoupper($punongBarangay);
+        }
+
         $this->SetFont('Times', 'UB', 12);
-        $this->Cell(0, 1, $punongBarangay['full_name'] ?? '                                                                    ', 0, 1, 'L');
+        $this->Cell(0, 6, 'HON. ' . $punongBarangayName, 0, 1, 'R');
         $this->SetFont('Times', '', 12);
-        $this->Cell(0, 10, 'Punong Barangay', 0, 1, 'L');
+        $this->Cell(0, 6, 'Punong Barangay', 0, 1, 'R');
         
         
         

@@ -1,0 +1,173 @@
+/* ============================================================
+   vehicles_index.css
+   Companion stylesheet for app/Views/vehicles/index.php
+   Sits on top of constituents_index.css base styles
+   ============================================================ */
+
+/* ── Page header (navy-blue vehicle theme) ── */
+.vehicles-header {
+    background: linear-gradient(135deg, #0f4c81 0%, #1a6fad 60%, #2589d0 100%) !important;
+}
+
+/* ── Plate number badge ── */
+.plate-badge {
+    display: inline-block;
+    background: #1e293b;
+    color: #f1f5f9;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: .82rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    padding: .22rem .6rem;
+    border-radius: 5px;
+    border: 2px solid #334155;
+    white-space: nowrap;
+}
+
+/* ── Vehicle type pill ── */
+.vehicle-type-badge {
+    display: inline-block;
+    background: #e0f2fe;
+    color: #0369a1;
+    font-size: .75rem;
+    font-weight: 600;
+    padding: .2rem .55rem;
+    border-radius: 999px;
+    border: 1px solid #bae6fd;
+    white-space: nowrap;
+}
+
+/* ── Colour swatch dot ── */
+.color-dot {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(0, 0, 0, .15);
+    flex-shrink: 0;
+}
+
+/* ── Owner hyperlink inside table ── */
+.owner-link {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    color: #1d4ed8;
+    font-size: .85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color .15s;
+}
+
+.owner-link:hover {
+    color: #1e40af;
+    text-decoration: underline;
+}
+
+/* ── Delete action button override ── */
+.btn-delete-vehicle {
+    background: #fef2f2 !important;
+    color: #dc2626 !important;
+    border: 1px solid #fecaca !important;
+}
+
+.btn-delete-vehicle:hover {
+    background: #fee2e2 !important;
+    color: #b91c1c !important;
+}
+
+/* ── Active-filter tag strip ── */
+.filter-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+    align-items: center;
+    margin-top: .5rem;
+}
+
+.filter-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    border-radius: 999px;
+    padding: .18rem .65rem;
+    font-size: .78rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.filter-tag--search {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+}
+
+.filter-tag--type {
+    background: #f0fdf4;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+
+.filter-tag--fuel {
+    background: #fdf4ff;
+    color: #7e22ce;
+    border: 1px solid #e9d5ff;
+}
+
+.filter-tag--color {
+    background: #fff7ed;
+    color: #c2410c;
+    border: 1px solid #fed7aa;
+}
+
+/* ── Empty-state cell ── */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem !important;
+    color: #9ca3af;
+}
+
+.empty-state svg {
+    display: block;
+    margin: 0 auto .75rem;
+    opacity: .35;
+}
+
+.empty-state h5 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: .35rem;
+}
+
+.empty-state p {
+    font-size: .875rem;
+    margin: 0;
+}
+
+.empty-state a {
+    color: #1d4ed8;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.empty-state a:hover {
+    text-decoration: underline;
+}
+
+/* ── Responsive tweaks ── */
+@media (max-width: 767px) {
+    .plate-badge {
+        font-size: .76rem;
+        padding: .18rem .45rem;
+    }
+
+    .vehicle-type-badge {
+        font-size: .7rem;
+    }
+
+    .action-btn-group {
+        flex-direction: column;
+        gap: .25rem;
+    }
+}

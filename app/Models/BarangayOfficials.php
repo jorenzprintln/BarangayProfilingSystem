@@ -13,13 +13,18 @@ class BarangayOfficials
     public function getAllOfficials()
     {
         $query = "SELECT bo.id, 
-                         CONCAT(c.first_name, ' ', c.middle_name, ' ', c.last_name) AS full_name, 
-                         bo.role
-                  FROM officials bo
-                  JOIN constituents c ON bo.constituent_id = c.id";
+                TRIM(CONCAT_WS(' ', 
+                    c.first_name, 
+                    NULLIF(TRIM(c.middle_name), ''), 
+                    c.last_name,
+                    NULLIF(TRIM(c.suffix), '')
+                )) AS full_name, 
+                bo.role
+        FROM officials bo
+        JOIN constituents c ON bo.constituent_id = c.id";
         $stmt = $this->db->connect()->prepare($query);
         $stmt->execute();
-        return $stmt->fetchAll() ?: []; // Return an empty array if no records are found
+        return $stmt->fetchAll() ?: [];
     }
 
     public function getOfficialById($id)
@@ -70,18 +75,55 @@ class BarangayOfficials
 
     public function getConstituentsNotInOfficials()
     {
-        $query = "SELECT * FROM constituents WHERE id NOT IN (SELECT constituent_id FROM officials)";
+        $query = "SELECT id,
+                TRIM(CONCAT_WS(' ',
+                    first_name,
+                    NULLIF(TRIM(middle_name), ''),
+                    last_name,
+                    NULLIF(TRIM(suffix), '')
+                )) AS full_name,
+                first_name, middle_name, last_name, suffix
+                FROM constituents    
+                WHERE id NOT IN (SELECT constituent_id FROM officials) 
+                AND removed_at IS NULL
+                ORDER BY last_name, first_name";
         $stmt = $this->db->connect()->prepare($query);
         $stmt->execute();
         return $stmt->fetchAll();
     }
 
+    /**
+     * Get official by role
+     * @param mixed $role Can be either role ID (int) or role name (string like 'SECRETARY', 'PUNONG BARANGAY')
+     * @return array|false Returns array with 'full_name' key or false if not found
+     */
     public function getOfficialByRole($role)
     {
         $connection = $this->db->connect();
-        $stmt = $connection->prepare("SELECT CONCAT(c.first_name, ' ', c.middle_name, ' ', c.last_name, ' ', IFNULL(c.suffix, '')) AS full_name FROM officials bo INNER JOIN constituents c ON bo.constituent_id = c.id WHERE bo.role = :role LIMIT 1");
-        $stmt->bindParam(':role', $role, PDO::PARAM_INT);
+        $stmt = $connection->prepare("
+            SELECT TRIM(CONCAT_WS(' ',
+                c.first_name,
+                NULLIF(TRIM(c.middle_name), ''),
+                c.last_name,
+                NULLIF(TRIM(c.suffix), '')
+            )) AS full_name 
+            FROM officials bo 
+            INNER JOIN constituents c ON bo.constituent_id = c.id 
+            WHERE bo.role = :role 
+            LIMIT 1
+        ");
+        $stmt->bindParam(':role', $role, PDO::PARAM_STR);
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    
+    public function hasRoleAssigned($role)
+    {
+        $query = "SELECT COUNT(*) as count FROM officials WHERE role = :role";
+        $stmt = $this->db->connect()->prepare($query);
+        $stmt->bindParam(':role', $role, PDO::PARAM_STR);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['count'] > 0;
     }
 }

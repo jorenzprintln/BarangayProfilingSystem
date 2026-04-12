@@ -2,10 +2,11 @@
 
 // Appliccation Settings
 const APP_NAME = "Barangay Profile System";
-const APP_URL = "http://localhost/bps";
+const APP_URL = 'http://localhost/barangay_system';
+const SINGLE_ADMIN_MODE = true;
 
 // Debug mode (set to false in production)
-const DEBUG = true;
+const DEBUG = false;
 
 // Path Definitions
 define('ROOT_PATH', dirname(__DIR__));
@@ -23,3 +24,7 @@ if (DEBUG) {
     error_reporting(0);
     ini_set('display_errors', 0);
 }
+const MAIL_USERNAME = 'jorenzlnu@gmail.com';
+const MAIL_PASSWORD = 'mxxj hiul qtbs dwtp';
+const MAIL_FROM_NAME = 'Barangay 36-A';
+const ADMIN_RECOVERY_KEY = 'Brgy36A@ProfilingSystem';

@@ -1,7 +1,7 @@
 # .htaccess - Apache configuration file
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /php-mvc-project/
+    RewriteBase /barangay_system/
     
     # Redirect to index.php if the file/directory doesn't exist
     RewriteCond %{REQUEST_FILENAME} !-f

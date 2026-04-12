@@ -14,12 +14,17 @@ class BarangayOfficialsController extends BaseController
 
     public function index()
     {
-        $officials = $this->model->getAllOfficials() ?? []; // Ensure $officials is always an array
-        $constituents = $this->model->getConstituentsNotInOfficials() ?? []; // Get available constituents
+        $officials = $this->model->getAllOfficials() ?? [];
+        $constituents = $this->model->getConstituentsNotInOfficials() ?? [];
+        
+        // Check if Punong Barangay exists
+        $hasPunongBarangay = $this->model->hasRoleAssigned('PUNONG BARANGAY');
+        
         $this->render('home/officials/index', [
             'title' => 'Barangay Officials', 
             'officials' => $officials,
-            'constituents' => $constituents // Pass constituents to the view
+            'constituents' => $constituents,
+            'hasPunongBarangay' => $hasPunongBarangay
         ]);
     }
 
@@ -38,10 +43,12 @@ class BarangayOfficialsController extends BaseController
 
         $barangayOfficialsModel = new BarangayOfficials();
         $availableConstituents = $barangayOfficialsModel->getConstituentsNotInOfficials();
+        $hasPunongBarangay = $barangayOfficialsModel->hasRoleAssigned('PUNONG BARANGAY');
 
         $this->render('home/officials/add_official', [
             'title' => 'Add Barangay Official',
-            'constituents' => $availableConstituents
+            'constituents' => $availableConstituents,
+            'hasPunongBarangay' => $hasPunongBarangay
         ]);
     }
 

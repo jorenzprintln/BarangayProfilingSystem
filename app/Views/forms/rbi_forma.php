@@ -59,13 +59,40 @@ class PDF extends FPDF
         $this->SetFont('Arial', 'B', 11);
         $this->Cell(0, 2, $household['barangay_code'] . ' ' . $household['barangay_name'] ?? '', 0, 1, 'L');
 
+        // FIXED: Build complete household address
+        $addressParts = [];
+        
+        if (!empty($household['house_building_number'])) {
+            $addressParts[] = 'House #' . $household['house_building_number'];
+        }
+        if (!empty($household['unit_number'])) {
+            $addressParts[] = 'Unit #' . $household['unit_number'];
+        }
+        if (!empty($household['block_number'])) {
+            $addressParts[] = 'Block #' . $household['block_number'];
+        }
+        if (!empty($household['lot_number'])) {
+            $addressParts[] = 'Lot #' . $household['lot_number'];
+        }
+        if (!empty($household['street_name'])) {
+            $addressParts[] = 'St.' .$household['street_name'];
+        }
+        if (!empty($household['purok'])) {
+            $addressParts[] = 'Purok ' . $household['purok'];
+        }
+        
+        $fullAddress = !empty($addressParts) ? implode(', ', $addressParts) : 'N/A';
+
         $this->SetFont('Arial', '', 11);
         $this->Cell(0, 10, 'HOUSEHOLD ADDRESS:', 0, '0', 'L');
         $this->SetX(72);
         $this->Cell(0, 10, '__________________________________________', 0, 0, 'L');
         $this->SetX(72);
         $this->SetFont('Arial', 'B', 11);
-        $this->Cell(0, 10, $household['city_municipality'] ?? '', 0, 1, 'L');
+        $this->Cell(0, 10, $fullAddress, 0, 1, 'L');
+
+        // FIXED: Count actual number of household members
+        $numberOfMembers = is_array($members) ? count($members) : 0;
 
         $this->SetFont('Arial', '', 11);
         $this->Cell(0, 2, 'NO. OF HOUSEHOLD MEMBERS:', 0, '0', 'L');
@@ -73,7 +100,7 @@ class PDF extends FPDF
         $this->Cell(0, 2, '__________________________________________', 0, 0, 'L');
         $this->SetX(72);
         $this->SetFont('Arial', 'B', 11);
-        $this->Cell(0, 2, $household['city_municipality'] ?? '', 0, 1, 'L');
+        $this->Cell(0, 2, $numberOfMembers, 0, 1, 'L');
         $this->Ln(10);
 
 
@@ -84,7 +111,7 @@ class PDF extends FPDF
         $this->Cell(30, 20, 'Place of Birth', 1, 0, 'C');
         $this->Cell(25, 20, 'Date of Birth', 1, 0, 'C');
         $this->Cell(10, 20, 'Age', 1, 0, 'C');
-        $this->Cell(10, 20, 'Sex', 1, 0, 'C');
+        $this->Cell(15, 20, 'Sex', 1, 0, 'C');
         $this->Cell(25, 20, 'Civil Status', 1, 0, 'C');
         $this->Cell(30, 20, 'Citizenship', 1, 0, 'C');
         $this->Cell(40, 20, 'Occupation', 1, 0, 'C');
@@ -112,7 +139,7 @@ class PDF extends FPDF
             $this->Cell(30, 5, $member['place_of_birth'], 1, 0, 'C');
             $this->Cell(25, 5, $member['date_of_birth'], 1, 0, 'C');
             $this->Cell(10, 5, $member['age'], 1, 0, 'C');
-            $this->Cell(10, 5, $member['sex'], 1, 0, 'C');
+            $this->Cell(15, 5, $member['sex'], 1, 0, 'C');
             $this->Cell(25, 5, $member['civil_status'], 1, 0, 'C');
             $this->Cell(30, 5, $member['citizenship'], 1, 0, 'C');
             $this->Cell(40, 5, $member['occupation'], 1, 0, 'C');
@@ -138,11 +165,17 @@ class PDF extends FPDF
         $this->Cell(0, 10, '____________________________________', 0, '0', 'R');
         $this->SetFont('Arial', 'B', 11);
         $this->SetX(48);
-        $this->Cell(1, 10, strtoupper($headOfHousehold), 0, 0, 'C'); // Head of Household
+        
+        // Format names properly
+        $headName = $headOfHousehold ? strtoupper($headOfHousehold) : '';
+        $secretaryName = $barangaySecretary ? strtoupper($barangaySecretary) : '';
+        $punongName = $punongBarangay ? strtoupper($punongBarangay) : '';
+        
+        $this->Cell(1, 10, htmlspecialchars($headName), 0, 0, 'C'); // Head of Household
         $this->SetX(163);
-        $this->Cell(1, 10, strtoupper($barangaySecretary), 0, 0, 'C'); // Barangay Secretary
+        $this->Cell(1, 10, htmlspecialchars($secretaryName), 0, 0, 'C'); // Barangay Secretary
         $this->SetX(280);
-        $this->Cell(1, 10, strtoupper($punongBarangay), 0, 1, 'C'); // Punong Barangay
+        $this->Cell(1, 10, 'HON. ' . htmlspecialchars($punongName), 0, 1, 'C');     
 
         $this->SetFont('Arial', 'B', 11);
         $this->SetX(18);

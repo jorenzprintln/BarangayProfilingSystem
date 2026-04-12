@@ -20,7 +20,6 @@ class PDF extends FPDF
         $y = ($this->h - $imageHeight) + 20;
         $this->Image('app/Views/forms/assets/doc_bg1.png', $x, $y, $imageWidth);
 
-
         $this->Image('app/Views/forms/assets/brgy_logo.png', 35, 20, 25.4, 25.4);
 
         // Add right logo with size set to 1 inch (25.4 mm)
@@ -77,9 +76,16 @@ class PDF extends FPDF
 
         $this->Ln(50); // Add a line break
 
+        // FIXED: Extract full_name from the punongBarangay array
+        $punongBarangayName = '';
+        if (is_array($punongBarangay) && isset($punongBarangay['full_name'])) {
+            $punongBarangayName = strtoupper($punongBarangay['full_name']);
+        } elseif (is_string($punongBarangay)) {
+            $punongBarangayName = strtoupper($punongBarangay);
+        }
+
         $this->SetFont('Times', 'UB', 14);
         $this->SetX($this->w - 100); // Indent the text
-        $punongBarangayName = is_array($punongBarangay) ? strtoupper(implode(' ', $punongBarangay)) : strtoupper($punongBarangay);
         $this->Cell(0, 10, "HON. {$punongBarangayName}", 0, 0, 'R');
         $this->Ln(5); // Add a small line break
         $this->SetFont('Times', '', 14);
@@ -102,10 +108,3 @@ $pdf->Output('F', $filePath);
 ob_end_clean();
 $pdf->Output('I', 'Certificate_of_Appearance.pdf');
 exit;
-
-// Display a success message to the user
-echo "<div style='text-align: center; margin-top: 20px;'>";
-echo "<h3>Certificate generated successfully!</h3>";
-echo "<p>Your certificate has been saved as: <strong>$filename</strong></p>";
-echo "<p>You can download it <a href='/$filePath' target='_blank'>here</a>.</p>";
-echo "</div>";

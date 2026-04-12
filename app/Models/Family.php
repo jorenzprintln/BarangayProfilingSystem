@@ -104,12 +104,15 @@ class Family
     // Count the total number of families
     public function countTotalFamilies()
     {
-        $sql = "SELECT COUNT(*) as total FROM {$this->table}";
+        // Only count families that belong to an existing household
+        $sql = "SELECT COUNT(*) as total FROM {$this->table} f
+                WHERE EXISTS (
+                    SELECT 1 FROM households h WHERE h.id = f.household_id
+                )";
         $stmt = $this->db->connect()->prepare($sql);
         $stmt->execute();
-        return $stmt->fetch()['total'];
+        return (int)$stmt->fetch()['total'];
     }
-
     public function getConstituentsInHouseholdNotInFamily($householdId)
     {
         $sql = "SELECT c.id, CONCAT(c.first_name, ' ', IFNULL(c.middle_name, ''), ' ', c.last_name, ' ', IFNULL(c.suffix, '')) AS full_name 
@@ -172,5 +175,112 @@ class Family
         $stmt = $this->db->connect()->prepare($sql);
         $stmt->execute();
         return $stmt->fetchColumn();
+    }
+    public function addMemberToFamily($constituentId, $familyId, $householdId)
+    {
+        $connection = $this->db->connect();
+        $stmt = $connection->prepare("
+            UPDATE constituents_families_households 
+            SET family_id = :family_id 
+            WHERE constituent_id = :constituent_id 
+            AND household_id = :household_id
+        ");
+        $stmt->bindParam(':family_id', $familyId, PDO::PARAM_INT);
+        $stmt->bindParam(':constituent_id', $constituentId, PDO::PARAM_INT);
+        $stmt->bindParam(':household_id', $householdId, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+
+    public function getFamilyById($familyId)
+    {
+        $connection = $this->db->connect();
+        $stmt = $connection->prepare("SELECT * FROM {$this->table} WHERE id = :family_id");
+        $stmt->bindParam(':family_id', $familyId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+   public function removeMemberFromFamily($constituentId, $familyId)
+    {
+        $connection = $this->db->connect();
+        $connection->beginTransaction();
+
+        try {
+            // Clear head reference if this constituent is the family head
+            $stmt = $connection->prepare("
+                UPDATE families 
+                SET head_constituent_id = NULL 
+                WHERE id = :family_id 
+                AND head_constituent_id = :constituent_id
+            ");
+            $stmt->bindParam(':family_id', $familyId, PDO::PARAM_INT);
+            $stmt->bindParam(':constituent_id', $constituentId, PDO::PARAM_INT);
+            $stmt->execute();
+
+            // Set family_id to NULL in junction table (keeps them in household)
+            $stmt = $connection->prepare("
+                UPDATE constituents_families_households 
+                SET family_id = NULL 
+                WHERE constituent_id = :constituent_id 
+                AND family_id = :family_id
+            ");
+            $stmt->bindParam(':constituent_id', $constituentId, PDO::PARAM_INT);
+            $stmt->bindParam(':family_id', $familyId, PDO::PARAM_INT);
+            $stmt->execute();
+
+            $connection->commit();
+            return true;
+        } catch (Exception $e) {
+            $connection->rollBack();
+            throw $e;
+        }
+    }
+    public function getFamilyMembersById($familyId)
+    {
+        $connection = $this->db->connect();
+        $stmt = $connection->prepare("
+            SELECT 
+                c.id,
+                CONCAT(c.first_name, ' ', IFNULL(c.middle_name, ''), ' ', c.last_name, ' ', IFNULL(c.suffix, '')) AS full_name,
+                (SELECT head_constituent_id FROM families WHERE id = :family_id_sub) AS head_constituent_id
+            FROM constituents_families_households cfh
+            INNER JOIN constituents c ON cfh.constituent_id = c.id
+            WHERE cfh.family_id = :family_id
+            ORDER BY c.last_name, c.first_name ASC
+        ");
+        $stmt->bindParam(':family_id', $familyId, PDO::PARAM_INT);
+        $stmt->bindParam(':family_id_sub', $familyId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    /**
+ * Demote the current head of a family to a regular member.
+ * Called before promoting a new head.
+ */
+    public function demoteCurrentHead($familyId)
+    {
+        $connection = $this->db->connect();
+        $stmt = $connection->prepare("
+            UPDATE families 
+            SET head_constituent_id = NULL 
+            WHERE id = :family_id
+        ");
+        $stmt->bindParam(':family_id', $familyId, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
+
+    /**
+     * Set a specific constituent as the head of a family.
+     */
+    public function setFamilyHead($familyId, $constituentId)
+    {
+        $connection = $this->db->connect();
+        $stmt = $connection->prepare("
+            UPDATE families 
+            SET head_constituent_id = :constituent_id 
+            WHERE id = :family_id
+        ");
+        $stmt->bindParam(':constituent_id', $constituentId, PDO::PARAM_INT);
+        $stmt->bindParam(':family_id', $familyId, PDO::PARAM_INT);
+        return $stmt->execute();
     }
 }

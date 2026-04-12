@@ -51,7 +51,7 @@ class PDF extends FPDF
         $this->MultiCell($this->w, 10, '', 0, 'J');
         $this->Write(10, '           This is to certify that ');
         $this->SetFont('Times', 'B', 12);
-        $this->Write(10, strtoupper( $constituent['first_name'] . ' ' . $constituent['middle_name'] . ' ' . $constituent['last_name'] ));
+        $this->Write(10, strtoupper( $constituent['first_name'] . ' ' . $constituent['middle_name'] . ' ' . $constituent['last_name'] . ' ' . ($constituent['suffix'] ?? '') ));
         $this->SetFont('Times', '', 12);
         $this->Write(10, ', of legal age, Filipino, is a bonafide resident of Barangay 36-A, Imelda Village, Tacloban City, Leyte, and is of Good Moral Character. This certification is issued upon the request of the aforementioned person for whatever legal purpose it may serve.');
         $this->Ln(10);
@@ -67,20 +67,36 @@ class PDF extends FPDF
         $this->SetFont('Times', 'B', 12);
         $this->Write(10, $date);
         $this->SetFont('Times', '', 12);
-        $this->Write(10, ' at the office of the Punong Barangay, Barangay 36-A, Tacloban City, Leyte');
+        $this->Write(10, ' at the office of the Punong Barangay, Barangay 36-A, Tacloban City, Leyte.');
 
         $this->Ln(30);
 
-        $this->SetFont('Times', 'UB', 12);
-        $this->Cell(0, 1, $punongBarangay['full_name'] ?? '                                                                    ', 0, 1, 'L');
-        $this->SetFont('Times', '', 12);
-        $this->Cell(0, 10, 'Punong Barangay', 0, 1, 'L');
-        $this->Ln(10);
+        // FIXED: Extract and display Punong Barangay name on the right
+        $punongBarangayName = '';
+        if (is_array($punongBarangay) && isset($punongBarangay['full_name'])) {
+            $punongBarangayName = strtoupper($punongBarangay['full_name']);
+        } elseif (is_string($punongBarangay)) {
+            $punongBarangayName = strtoupper($punongBarangay);
+        }
 
         $this->SetFont('Times', 'UB', 12);
-        $this->Cell(0, 1, strtoupper($barangaySecretary['full_name']) ?? '                                                                    ', 0, 1, 'L');
+        $this->Cell(0, 6, 'HON. ' . $punongBarangayName, 0, 1, 'R');
         $this->SetFont('Times', '', 12);
-        $this->Cell(0, 10, 'Barangay Secretary', 0, 1, 'L');
+        $this->Cell(0, 6, 'Punong Barangay', 0, 1, 'R');
+        $this->Ln(10);
+
+        // FIXED: Extract and display Barangay Secretary name on the right
+        $barangaySecretaryName = '';
+        if (is_array($barangaySecretary) && isset($barangaySecretary['full_name'])) {
+            $barangaySecretaryName = strtoupper($barangaySecretary['full_name']);
+        } elseif (is_string($barangaySecretary)) {
+            $barangaySecretaryName = strtoupper($barangaySecretary);
+        }
+
+        $this->SetFont('Times', 'UB', 12);
+        $this->Cell(0, 6, $barangaySecretaryName, 0, 1, 'R');  // Right-aligned name
+        $this->SetFont('Times', '', 12);
+        $this->Cell(0, 6, 'Barangay Secretary', 0, 1, 'R');    // Right-aligned title
 
     }
 }

@@ -14,30 +14,27 @@ class PDF extends FPDF
     public function Header()
     {
         // Center the background image on the page
-        $imageWidth = 210; // Width of the image in mm
-        $imageHeight = 297; // Height of the image in mm
+        $imageWidth = 210;
+        $imageHeight = 297;
         $x = ($this->w - $imageWidth) / 2;
         $y = ($this->h - $imageHeight) + 20;
         $this->Image('app/Views/forms/assets/doc_bg1.png', $x, $y, $imageWidth);
 
-
         $this->Image('app/Views/forms/assets/brgy_logo.png', 35, 20, 25.4, 25.4);
-
-        // Add right logo with size set to 1 inch (25.4 mm)
         $this->Image('app/Views/forms/assets/city_logo.png', $this->w - 60, 20, 25.4, 25.4);
 
         // Add header text
-        $this->SetFont('Arial', '', 13.5);
+        $this->SetFont('Times', '', 13.5);
         $this->Cell(0, 1, 'Republic of the Philippines', 0, 1, 'C');
         $this->Cell(0, 10, 'Department of Interior of Local Government', 0, 1, 'C');
 
-        $this->SetFont('Arial', 'B', 13.5);
+        $this->SetFont('Times', 'B', 13.5);
         $this->Cell(0, 1, 'OFFICE OF THE BARANGAY COUNCIL', 0, 1, 'C');
 
-        $this->SetFont('Arial', '', 13.5);
+        $this->SetFont('Times', '', 13.5);
         $this->Cell(0, 10, 'Imelda Village, Barangay 36-A', 0, 1, 'C');
         $this->Cell(0, 1, 'Tacloban City', 0, 1, 'C');
-        $this->Ln(10); // Add a line break
+        $this->Ln(10);
     }
 
 }
@@ -45,34 +42,74 @@ class PDF extends FPDF
 $pdf = new PDF();
 $pdf->AliasNbPages();
 $pdf->AddPage();
-$pdf->SetFont('Arial', '', 12);
 
-$pdf->SetFont('Arial', 'B', 12);
+// Title - Bold and larger
+$pdf->SetFont('Times', 'B', 14);
 $pdf->Cell(0, 10, 'CERTIFICATION', 0, 1, 'C');
 $pdf->Ln(5);
-// Certificate Content
-$pdf->SetFont('Arial', '', 12);
+
+// "TO WHOM IT MAY CONCERN" - Regular
+$pdf->SetFont('Times', '', 12);
 $pdf->Cell(0, 10, 'TO WHOM IT MAY CONCERN:', 0, 1, 'L');
 $pdf->Ln(5);
 
-$pdf->MultiCell(0, 6, 'This is to certify that ' . strtoupper($constituent['first_name'] . ' ' . $constituent['middle_name'] . ' ' . $constituent['last_name']) . ', ' . strtolower($constituent['sex']) . ', of legal age, ' . strtolower($constituent['civil_status']) . ', Filipino and a resident of Barangay 36-A Imelda Village, Tacloban City, Leyte is a SOLO PARENT with the following dependents:', 0, 'J');
-$pdf->Ln(5);
+// Main paragraph with mixed formatting
+$pdf->SetFont('Times', '', 12);
+$pdf->Write(6, '          This is to certify that ');
 
-// List dependents
+// Name in BOLD and uppercase
+$pdf->SetFont('Times', 'B', 12);
+$pdf->Write(6, strtoupper($constituent['first_name'] . ' ' . $constituent['middle_name'] . ' ' . $constituent['last_name'] . ' ' . ($constituent['suffix'] ?? '')));
+
+// Continue with regular font
+$pdf->SetFont('Times', '', 12);
+$pdf->Write(6, ', ' . strtolower($constituent['sex']) . ', of legal age, ' . strtolower($constituent['civil_status']) . ', Filipino and a resident of Barangay 36-A Imelda Village, Tacloban City, Leyte is a ');
+
+// "SOLO PARENT" in BOLD
+$pdf->SetFont('Times', 'B', 12);
+$pdf->Write(6, 'SOLO PARENT');
+
+// Continue regular
+$pdf->SetFont('Times', '', 12);
+$pdf->Write(6, ' with the following dependents:');
+$pdf->Ln(10);
+
+// Dependents list - Regular font
+$pdf->SetFont('Times', '', 12);
 $pdf->SetX(30);
 $pdf->MultiCell(0, 6, $dependents, 0, 'L');
 $pdf->Ln(5);
 
-$pdf->MultiCell(0, 6, 'This certification is being issued upon the request of the above-named person for the purpose of: ' . $purpose, 0, 'J');
-$pdf->Ln(5);
+// Purpose paragraph
+$pdf->SetFont('Times', '', 12);
+$pdf->Write(6, '          This certification is being issued upon the request of the above-named person for the purpose of ');
 
-$pdf->MultiCell(0, 6, 'Given this ' . $date . ' at Barangay Bolbok, Lipa City, Batangas, Philippines.', 0, 'J');
+// Purpose in BOLD and uppercase
+$pdf->SetFont('Times', 'B', 12);
+$pdf->Write(6, strtoupper($purpose));
+
+$pdf->SetFont('Times', '', 12);
+$pdf->Write(6, '.');
+$pdf->Ln(10);
+
+// Date paragraph
+$pdf->SetFont('Times', '', 12);
+$pdf->Write(6, '          Given this ');
+
+// Date in BOLD
+$pdf->SetFont('Times', 'B', 12);
+$pdf->Write(6, $date);
+
+$pdf->SetFont('Times', '', 12);
+$pdf->Write(6, ' at Barangay 36-A, Tacloban City, Leyte.');
 $pdf->Ln(20);
 
-// Signature Line for Punong Barangay
-$pdf->SetFont('Arial', 'UB', 12);
-$pdf->Cell(0, 6, strtoupper($punongBarangay['full_name']), 0, 1, 'R');
-$pdf->SetFont('Arial', '', 12);
+// Signature Line - Bold and underlined for name
+$pdf->SetFont('Times', 'UB', 12);
+$pdf->Cell(0, 6, 'HON. ' . strtoupper($punongBarangay['full_name']), 0, 1, 'R');
+
+// Title - Regular
+$pdf->SetFont('Times', '', 12);
 $pdf->Cell(0, 6, 'Punong Barangay', 0, 1, 'R');
 
 // Save the PDF to file

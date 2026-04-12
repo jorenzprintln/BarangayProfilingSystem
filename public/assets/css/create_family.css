@@ -1,0 +1,350 @@
+:root {
+    --primary-color: #4361ee;
+    --primary-hover: #3651d4;
+    --danger-color: #ef476f;
+    --success-color: #06d6a0;
+    --warning-color: #ffd166;
+    --card-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.08);
+    --card-shadow-hover: 0 0.5rem 1rem rgba(0, 0, 0, 0.12);
+}
+
+@font-face {
+    font-family: 'Montserrat';
+    src: url('public/assets/fonts/Montserrat-Regular.ttf') format('truetype');
+}
+
+body {
+    background-color: #f5f6fa;
+    font-family: 'Montserrat', sans-serif;
+}
+
+/* ── Page Header ── */
+.page-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, #3651d4 100%);
+    color: white;
+    padding: 2rem;
+    margin: 0 0 2rem 0;
+    border-radius: 0.5rem;
+    box-shadow: var(--card-shadow);
+}
+
+/* ── Back Button ── */
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    background: white;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 0.5rem;
+    color: #4a5568;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: var(--card-shadow);
+    font-family: 'Montserrat', sans-serif;
+}
+
+.btn-back:hover {
+    background: #2d3748;
+    color: white;
+    border-color: #2d3748;
+    text-decoration: none;
+    transform: translateX(-2px);
+}
+
+/* ── Action Bar ── */
+.action-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+/* ── Info Card ── */
+.info-card {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 2rem;
+    border: none;
+    overflow: hidden;
+    transition: box-shadow 0.3s ease;
+}
+
+.info-card:hover {
+    box-shadow: var(--card-shadow-hover);
+}
+
+.info-card-header {
+    display: flex;
+    align-items: center;
+    padding: 1.25rem 1.75rem;
+    border-bottom: 2px solid #e9ecef;
+    background: #fafbfc;
+    gap: 0.75rem;
+}
+
+.info-card-header svg {
+    color: var(--primary-color);
+    flex-shrink: 0;
+}
+
+.info-card-header h5 {
+    margin: 0;
+    color: #2d3748;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.info-card-body {
+    padding: 1.5rem 1.75rem;
+}
+
+/* ── Form Controls ── */
+.form-label-modern {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #a0aec0;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.form-control-modern {
+    width: 100%;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 0.5rem;
+    padding: 0.65rem 0.875rem;
+    font-size: 0.875rem;
+    font-family: 'Montserrat', sans-serif;
+    color: #2d3748;
+    background: white;
+    transition: all 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.form-control-modern:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.18rem rgba(67,97,238,0.15);
+    outline: none;
+}
+
+.form-control-modern::placeholder { color: #cbd5e0; }
+
+select.form-control-modern {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23a0aec0' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.875rem center;
+    padding-right: 2.25rem;
+}
+
+.form-group-modern { margin-bottom: 1.5rem; }
+
+/* ── Info Grid ── */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+}
+
+.info-divider {
+    border: none;
+    border-top: 1px dashed #e2e8f0;
+    margin: 1.5rem 0;
+}
+
+/* ── Member Scroll List ── */
+.member-scroll-list {
+    max-height: 350px;
+    overflow-y: auto;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 0.75rem;
+    padding: 0.5rem;
+    background: #f8f9fa;
+}
+
+.member-scroll-list::-webkit-scrollbar { width: 6px; }
+.member-scroll-list::-webkit-scrollbar-track { background: #f0f2f5; border-radius: 10px; }
+.member-scroll-list::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 10px; }
+.member-scroll-list::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
+
+/* ── Member Check Item ── */
+.member-check-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: white;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 0.6rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.member-check-item:last-child { margin-bottom: 0; }
+
+.member-check-item:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 8px rgba(67,97,238,0.08);
+}
+
+.member-check-item.is-checked {
+    border-color: var(--primary-color);
+    background: #f0f3ff;
+}
+
+/* ── Custom Checkbox ── */
+.custom-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #cbd5e0;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.custom-checkbox:checked {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.custom-checkbox:checked::after {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 1px;
+    width: 6px;
+    height: 10px;
+    border: 2px solid white;
+    border-top: none;
+    border-left: none;
+    transform: rotate(45deg);
+}
+
+.member-check-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #2d3748;
+    flex: 1;
+}
+
+/* ── Selected Chip ── */
+.selected-chip {
+    background: rgba(67, 97, 238, 0.08);
+    border: 1.5px solid rgba(67, 97, 238, 0.2);
+    border-radius: 0.5rem;
+    padding: 0.45rem 0.875rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.selected-chip .count-dot {
+    background: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+/* ── Empty State ── */
+.empty-members {
+    text-align: center;
+    padding: 2.5rem;
+    color: #a0aec0;
+    font-style: italic;
+    font-size: 0.875rem;
+}
+
+/* ── Alert Info ── */
+.alert-info-custom {
+    background: #eff6ff;
+    border: 1.5px solid #bfdbfe;
+    border-left: 4px solid #3b82f6;
+    border-radius: 0.5rem;
+    padding: 0.875rem 1.25rem;
+    font-size: 0.85rem;
+    color: #1e40af;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+/* ── Buttons ── */
+.btn-submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 2rem;
+    background: linear-gradient(135deg, var(--primary-color) 0%, #3651d4 100%);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(67, 97, 238, 0.3);
+    font-family: 'Montserrat', sans-serif;
+}
+
+.btn-submit:hover {
+    box-shadow: 0 6px 12px rgba(67, 97, 238, 0.4);
+    transform: translateY(-1px);
+    color: white;
+}
+
+.btn-cancel {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: white;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 0.5rem;
+    color: #4a5568;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.btn-cancel:hover {
+    background: #f7fafc;
+    color: #2d3748;
+    text-decoration: none;
+}
+
+.required-star {
+    color: var(--danger-color);
+    margin-left: 2px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .page-header { padding: 1.5rem; }
+    .info-card-body { padding: 1.25rem; }
+    .info-grid { grid-template-columns: 1fr; }
+}

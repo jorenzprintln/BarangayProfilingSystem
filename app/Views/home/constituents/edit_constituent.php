@@ -1,524 +1,503 @@
 <?php
 $content = ob_start();
+$standardCitizenships   = ['FILIPINO', 'OTHERS'];
+
+$useData = !empty($errors);
+
+$citizenshipVal     = $useData ? ($data['citizenship'] ?? '') : ($constituent['citizenship'] ?? '');
+$isOthers           = !in_array($citizenshipVal, $standardCitizenships);
+$citizenshipOthersValue = $isOthers ? $citizenshipVal : '';
+
+
+$educationLevels = [
+    '1'  => 'Daycare',
+    '2'  => 'Nursery',
+    '3'  => 'Kindergarten',
+    '4'  => 'Elementary',
+    '5'  => 'ALS',
+    '6'  => 'High School',
+    '7'  => 'Junior High School',
+    '8'  => 'Senior High School',
+    '9'  => 'Vocational',
+    '10' => 'College',
+    '11' => 'Post Graduate',
+];
 ?>
+
+<link rel="stylesheet" href="public/assets/css/constituent_create.css">
+<link rel="stylesheet" href="public/assets/css/constituent_edit.css">
+
 <div class="container-fluid px-4 mt-3">
-    <div class="d-flex align-items-center mb-3">
-        <a href="index.php?controller=constituents&action=index" class="mr-2">
-            <img src="public/assets/icons/back.icon.png" alt="Back" style="width: 32px; height: 32px;">
-        </a>
-        <h3 class="font-weight-bold mb-0">Edit Constituent</h3>
-    </div>
-    
-    <div class="shadow-sm border">
-        <div class="card-body">
-            <?php if (isset($errors['update_constituent'])): ?>
-                <div class="alert alert-danger">
-                    <?= $errors['update_constituent'] ?>
+    <div class="content-wrapper">
+
+        <!-- Back Button -->
+        <div style="display:flex; margin-bottom:1.5rem;">
+            <a href="index.php?controller=constituents&action=index" class="btn-back">
+                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 12H5M12 5l-7 7 7 7"/>
+                </svg>
+                Back to List
+            </a>
+        </div>
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="d-flex align-items-center mt-3">
+                <svg width="36" height="36" fill="white" viewBox="0 0 20 20" class="mr-3">
+                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
+                </svg>
+                <div>
+                    <h2 class="font-weight-bold mb-0">Edit Constituent</h2>
+                    <p class="mb-0 mt-1" style="opacity:0.9;font-size:0.95rem;">Update constituent information below</p>
                 </div>
-            <?php endif; ?>
-            
-            <form action="index.php?controller=constituents&action=update&id=<?= $constituent['id'] ?>" method="post" id="constituentForm" novalidate>
+            </div>
+        </div>
+
+        <!-- Server-side error → JS modal trigger -->
+        <?php if (isset($errors['duplicate_org_id'])): ?>
+        <script>
+            var SERVER_ERROR = {
+                type:           'duplicate_org_id',
+                org_id:         <?= json_encode($data['duplicate_org_id'] ?? '') ?>,
+                classification: <?= json_encode($data['duplicate_classification_name'] ?? 'this classification') ?>
+            };
+        </script>
+        <?php elseif (isset($errors['update_constituent'])): ?>
+        <script>
+            var SERVER_ERROR = {
+                type:    'general',
+                message: <?= json_encode($errors['update_constituent']) ?>
+            };
+        </script>
+        <?php endif; ?>
+
+        <!-- Main Form -->
+        <form action="index.php?controller=constituents&action=update&id=<?= $constituent['id'] ?>" method="post" id="constituentForm" novalidate>
+
+            <!-- Personal Information -->
+            <div class="form-card">
+                <div class="section-header">
+                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                    </svg>
+                    <h5>Personal Information</h5>
+                </div>
+
+                <?php
+                // Helper: prefer $data (re-render after error) over $constituent (first load)
+                $f = function(string $field) use ($useData, $data, $constituent) {
+                    return $useData
+                        ? ($data[$field] ?? $constituent[$field] ?? '')
+                        : ($constituent[$field] ?? '');
+                };
+                ?>
+
                 <div class="row">
-                    <div class="col-md-6">
-                        <label for="psn">PhilSys Card No.</label>
-                        <input type="text" class="form-control <?= isset($errors['psn']) ? 'is-invalid' : '' ?>" id="psn" name="psn"
-                            value="<?= htmlspecialchars($constituent['psn'] ?? '') ?>"
-                            placeholder="ex. 1234567890123456" pattern="\d{16}" title="Please enter a valid 16-digit PhilSys Number" maxlength="16">
-                        <div class="invalid-feedback" id="psn-feedback">
-                            <?= $errors['psn'] ?? 'Please enter a valid 16-digit PhilSys Number' ?>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <label for="registered_voter">Registered Voter? *</label>
-                        <div class="d-flex align-items-center">
-                            <div class="form-check mr-3">
-                                <input class="form-check-input" type="radio" name="registered_voter" id="yes" value="YES"
-                                    <?= $constituent['registered_voter'] === 'YES' ? 'checked' : '' ?> required>
-                                <label class="form-check-label" for="yes">Yes</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="registered_voter" id="no" value="NO"
-                                    <?= $constituent['registered_voter'] === 'NO' ? 'checked' : '' ?> required>
-                                <label class="form-check-label" for="no">No</label>
-                            </div>
-                        </div>
-                        <?php if (isset($errors['registered_voter'])): ?>
-                            <div class="invalid-feedback d-block">
-                                <?= $errors['registered_voter'] ?>
-                            </div>
-                        <?php endif; ?>
-                        <div class="invalid-feedback" id="registered_voter-feedback">
-                            Please select if constituent is a registered voter
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label for="psn">PhilSys Card No.</label>
+                            <input type="text" class="form-control <?= isset($errors['psn']) ? 'is-invalid' : '' ?>"
+                                id="psn" name="psn" placeholder="Enter 16-digit PhilSys Number"
+                                value="<?= htmlspecialchars($f('psn')) ?>" pattern="\d{16}" maxlength="16">
+                            <div class="invalid-feedback"><?= $errors['psn'] ?? 'Please enter a valid 16-digit PhilSys Number' ?></div>
                         </div>
                     </div>
 
-                    <div class="col-md-6">
-                        <label for="last_name">Last Name *</label>
-                        <input type="text" class="form-control <?= isset($errors['last_name']) ? 'is-invalid' : '' ?>" id="last_name" name="last_name"
-                            value="<?= htmlspecialchars($constituent['last_name']) ?>" placeholder="ex. Dela Cruz" required
-                            minlength="2" pattern="[A-Za-z\s\-']{2,}" title="Last name must be at least 2 characters (letters only)">
-                        <div class="invalid-feedback" id="last_name-feedback">
-                            <?= $errors['last_name'] ?? 'Last name must be at least 2 characters (letters only)' ?>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <label for="first_name">Given Name *</label>
-                        <input type="text" class="form-control <?= isset($errors['first_name']) ? 'is-invalid' : '' ?>" id="first_name" name="first_name"
-                            value="<?= htmlspecialchars($constituent['first_name']) ?>" placeholder="ex. Juan" required
-                            minlength="2" pattern="[A-Za-z\s\-']{2,}" title="Given name must be at least 2 characters (letters only)">
-                        <div class="invalid-feedback" id="first_name-feedback">
-                            <?= $errors['first_name'] ?? 'Given name must be at least 2 characters (letters only)' ?>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <label for="middle_name">Middle Name</label>
-                        <input type="text" class="form-control <?= isset($errors['middle_name']) ? 'is-invalid' : '' ?>" id="middle_name" name="middle_name"
-                            value="<?= htmlspecialchars($constituent['middle_name'] ?? '') ?>" pattern="[A-Za-z\s\-']*" title="Middle name must contain letters only">
-                        <div class="invalid-feedback" id="middle_name-feedback">
-                            <?= $errors['middle_name'] ?? 'Middle name must contain letters only' ?>
-                        </div>
-                    </div>
-                    <div class="col-md-1">
-                        <label for="suffix">Suffix</label>
-                        <select class="form-control <?= isset($errors['suffix']) ? 'is-invalid' : '' ?>" id="suffix" name="suffix">
-                            <option value=""></option>
-                            <option value="Jr." <?= $constituent['suffix'] === 'Jr.' ? 'selected' : '' ?>>Jr.</option>
-                            <option value="Sr." <?= $constituent['suffix'] === 'Sr.' ? 'selected' : '' ?>>Sr.</option>
-                            <option value="III" <?= $constituent['suffix'] === 'III' ? 'selected' : '' ?>>III</option>
-                            <option value="IV" <?= $constituent['suffix'] === 'IV' ? 'selected' : '' ?>>IV</option>
-                            <option value="V" <?= $constituent['suffix'] === 'V' ? 'selected' : '' ?>>V</option>
-                            <option value="VI" <?= $constituent['suffix'] === 'VI' ? 'selected' : '' ?>>VI</option>
-                            <option value="VII" <?= $constituent['suffix'] === 'VII' ? 'selected' : '' ?>>VII</option>
-                            <option value="VIII" <?= $constituent['suffix'] === 'VIII' ? 'selected' : '' ?>>VIII</option>
-                            <option value="IX" <?= $constituent['suffix'] === 'IX' ? 'selected' : '' ?>>IX</option>
-                            <option value="X" <?= $constituent['suffix'] === 'X' ? 'selected' : '' ?>>X</option>
-                        </select>
-                        <div class="invalid-feedback" id="suffix-feedback">
-                            <?= $errors['suffix'] ?? 'Please select a valid suffix' ?>
-                        </div>
-                    </div>
-                    <div class="col-md-1">
-                        <label for="sex">Sex *</label>
-                        <div class="d-flex align-items-center">
-                            <div class="form-check mr-2">
-                                <input class="form-check-input" type="radio" name="sex" id="male" value="MALE"
-                                    <?= $constituent['sex'] === 'MALE' ? 'checked' : '' ?> required>
-                                <label class="form-check-label" for="male">Male</label>
+                    <div class="col-lg-6">
+                        <div class="form-group">
+                            <label>Registered Voter? <span class="required">*</span></label>
+                            <div class="custom-radio-group" style="margin-top:0;">
+                                <div class="custom-radio">
+                                    <input type="radio" name="registered_voter" id="voter_yes" value="YES"
+                                        <?= $f('registered_voter') === 'YES' ? 'checked' : '' ?> required>
+                                    <label for="voter_yes">Yes</label>
+                                </div>
+                                <div class="custom-radio">
+                                    <input type="radio" name="registered_voter" id="voter_no" value="NO"
+                                        <?= $f('registered_voter') === 'NO' ? 'checked' : '' ?> required>
+                                    <label for="voter_no">No</label>
+                                </div>
                             </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="sex" id="female" value="FEMALE"
-                                    <?= $constituent['sex'] === 'FEMALE' ? 'checked' : '' ?> required>
-                                <label class="form-check-label" for="female">Female</label>
-                            </div>
-                        </div>
-                        <?php if (isset($errors['sex'])): ?>
-                            <div class="invalid-feedback d-block">
-                                <?= $errors['sex'] ?>
-                            </div>
-                        <?php endif; ?>
-                        <div class="invalid-feedback" id="sex-feedback">
-                            Required
+                            <?php if (isset($errors['registered_voter'])): ?>
+                                <div class="invalid-feedback d-block"><?= $errors['registered_voter'] ?></div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
 
                 <div class="row">
-                    <div class="col-md-6">
-                        <label for="birthdate">Birthdate</label>
-                        <input type="date" class="form-control <?= isset($errors['birthdate']) ? 'is-invalid' : '' ?>" id="birthdate" name="birthdate"
-                            value="<?= htmlspecialchars($constituent['birthdate']) ?>" required max="<?= date('Y-m-d') ?>">
-                        <div class="invalid-feedback" id="birthdate-feedback">
-                            <?= $errors['birthdate'] ?? 'Please enter a valid birthdate (not in the future)' ?>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="last_name">Last Name <span class="required">*</span></label>
+                            <input type="text" class="form-control <?= isset($errors['last_name']) ? 'is-invalid' : '' ?>"
+                                id="last_name" name="last_name" placeholder="Dela Cruz" required
+                                value="<?= htmlspecialchars($f('last_name')) ?>" minlength="2" pattern="[A-Za-z\s\-']{2,}">
+                            <div class="invalid-feedback"><?= $errors['last_name'] ?? 'Last name must be at least 2 characters (letters only)' ?></div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <label for="birthplace">Birth Place</label>
-                        <input type="text" class="form-control <?= isset($errors['birthplace']) ? 'is-invalid' : '' ?>" id="birthplace" name="birthplace"
-                            value="<?= htmlspecialchars($constituent['birthplace']) ?>" placeholder="TACLOBAN CITY" required>
-                        <div class="invalid-feedback" id="birthplace-feedback">
-                            <?= $errors['birthplace'] ?? 'Please enter a valid birth place' ?>
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="first_name">Given Name <span class="required">*</span></label>
+                            <input type="text" class="form-control <?= isset($errors['first_name']) ? 'is-invalid' : '' ?>"
+                                id="first_name" name="first_name" placeholder="Juan" required
+                                value="<?= htmlspecialchars($f('first_name')) ?>" minlength="2" pattern="[A-Za-z\s\-']{2,}">
+                            <div class="invalid-feedback"><?= $errors['first_name'] ?? 'Given name must be at least 2 characters (letters only)' ?></div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <label for="civil_status">Civil Status</label>
-                        <select class="form-control <?= isset($errors['civil_status']) ? 'is-invalid' : '' ?>" id="civil_status" name="civil_status" required>
-                            <option value="SINGLE" <?= $constituent['civil_status'] === 'SINGLE' ? 'selected' : '' ?>>SINGLE</option>
-                            <option value="MARRIED" <?= $constituent['civil_status'] === 'MARRIED' ? 'selected' : '' ?>>MARRIED</option>
-                            <option value="WIDOWED" <?= $constituent['civil_status'] === 'WIDOWED' ? 'selected' : '' ?>>WIDOWED</option>
-                            <option value="SEPARATED" <?= $constituent['civil_status'] === 'SEPARATED' ? 'selected' : '' ?>>SEPARATED</option>
-                            <option value="DIVORCED" <?= $constituent['civil_status'] === 'DIVORCED' ? 'selected' : '' ?>>DIVORCED</option>
-                        </select>
-                        <div class="invalid-feedback" id="civil_status-feedback">
-                            <?= $errors['civil_status'] ?? 'Please select civil status' ?>
+
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="middle_name">Middle Name</label>
+                            <input type="text" class="form-control <?= isset($errors['middle_name']) ? 'is-invalid' : '' ?>"
+                                id="middle_name" name="middle_name" placeholder="Santos"
+                                value="<?= htmlspecialchars($f('middle_name')) ?>" pattern="[A-Za-z\s\-']*">
+                            <div class="invalid-feedback"><?= $errors['middle_name'] ?? 'Middle name must contain letters only' ?></div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <label for="religion">Religion</label>
-                        <select class="form-control <?= isset($errors['religion']) ? 'is-invalid' : '' ?>" id="religion" name="religion" required>
-                            <option value="ROMAN CATHOLIC" <?= $constituent['religion'] === 'ROMAN CATHOLIC' ? 'selected' : '' ?>>ROMAN CATHOLIC</option>
-                            <option value="PROTESTANT" <?= $constituent['religion'] === 'PROTESTANT' ? 'selected' : '' ?>>PROTESTANT</option>
-                            <option value="IGLESIA NI CRISTO" <?= $constituent['religion'] === 'IGLESIA NI CRISTO' ? 'selected' : '' ?>>IGLESIA NI CRISTO</option>
-                            <option value="BORN AGAIN" <?= $constituent['religion'] === 'BORN AGAIN' ? 'selected' : '' ?>>BORN AGAIN</option>
-                            <option value="SEVENTH DAY ADVENTIST" <?= $constituent['religion'] === 'SEVENTH DAY ADVENTIST' ? 'selected' : '' ?>>SEVENTH DAY ADVENTIST</option>
-                            <option value="ISLAM" <?= $constituent['religion'] === 'ISLAM' ? 'selected' : '' ?>>ISLAM</option>
-                            <option value="BAPTIST" <?= $constituent['religion'] === 'BAPTIST' ? 'selected' : '' ?>>BAPTIST</option>
-                            <option value="JEHOVAH'S WITNESS" <?= $constituent['religion'] === 'JEHOVAH\'S WITNESS' ? 'selected' : '' ?>>JEHOVAH'S WITNESS</option>
-                            <option value="BUDDHISM" <?= $constituent['religion'] === 'BUDDHISM' ? 'selected' : '' ?>>BUDDHISM</option>
-                            <option value="HINDUISM" <?= $constituent['religion'] === 'HINDUISM' ? 'selected' : '' ?>>HINDUISM</option>
-                            <option value="OTHERS" <?= $constituent['religion'] === 'OTHERS' ? 'selected' : '' ?>>OTHERS</option>
-                        </select>
-                        <div class="invalid-feedback" id="religion-feedback">
-                            <?= $errors['religion'] ?? 'Please select religion' ?>
+
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="suffix">Suffix</label>
+                            <select class="form-control <?= isset($errors['suffix']) ? 'is-invalid' : '' ?>" id="suffix" name="suffix">
+                                <option value="" <?= empty($f('suffix')) ? 'selected' : '' ?>>None</option>
+                                <?php foreach (['Jr.','Sr.','III','IV','V','VI','VII','VIII','IX','X'] as $sfx): ?>
+                                    <option value="<?= $sfx ?>" <?= $f('suffix') === $sfx ? 'selected' : '' ?>><?= $sfx ?></option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
                     </div>
                 </div>
+
                 <div class="row">
                     <div class="col-md-6">
-                        <label for="citizenship">Citizenship</label>
-                        <select class="form-control <?= isset($errors['citizenship']) ? 'is-invalid' : '' ?>" id="citizenship" name="citizenship" required>
-                            <option value="FILIPINO" <?= $constituent['citizenship'] === 'FILIPINO' ? 'selected' : '' ?>>FILIPINO</option>
-                            <option value="OTHERS" <?= $constituent['citizenship'] === 'OTHERS' ? 'selected' : '' ?>>OTHERS</option>
-                        </select>
-                        <div class="invalid-feedback" id="citizenship-feedback">
-                            <?= $errors['citizenship'] ?? 'Please select citizenship' ?>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <label for="contact">Contact Number</label>
-                        <input type="text" class="form-control <?= isset($errors['contact']) ? 'is-invalid' : '' ?>" id="contact" name="contact"
-                            value="<?= htmlspecialchars($constituent['contact'] ?? '') ?>" placeholder="ex. 09123456789"
-                            pattern="(\+63|0)\d{10}" title="Please enter a valid Philippine phone number (e.g., 09123456789 or +639123456789)">
-                        <div class="invalid-feedback" id="contact-feedback">
-                            <?= $errors['contact'] ?? 'Please enter a valid Philippine phone number (e.g., 09123456789 or +639123456789)' ?>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <label for="email">Email</label>
-                        <input type="email" class="form-control <?= isset($errors['email']) ? 'is-invalid' : '' ?>" id="email" name="email"
-                            value="<?= htmlspecialchars($constituent['email'] ?? '') ?>">
-                        <div class="invalid-feedback" id="email-feedback">
-                            <?= $errors['email'] ?? 'Please enter a valid email address' ?>
+                        <div class="form-group">
+                            <label>Sex <span class="required">*</span></label>
+                            <div class="custom-radio-group">
+                                <div class="custom-radio">
+                                    <input type="radio" name="sex" id="male" value="MALE"
+                                        <?= $f('sex') === 'MALE' ? 'checked' : '' ?> required>
+                                    <label for="male">Male</label>
+                                </div>
+                                <div class="custom-radio">
+                                    <input type="radio" name="sex" id="female" value="FEMALE"
+                                        <?= $f('sex') === 'FEMALE' ? 'checked' : '' ?> required>
+                                    <label for="female">Female</label>
+                                </div>
+                            </div>
+                            <?php if (isset($errors['sex'])): ?>
+                                <div class="invalid-feedback d-block"><?= $errors['sex'] ?></div>
+                            <?php endif; ?>
                         </div>
                     </div>
 
-
                     <div class="col-md-6">
-                        <label for="education_attainment">Highest Educational Attainment</label>
-                        <select class="form-control <?= isset($errors['education_attainment']) ? 'is-invalid' : '' ?>" id="education_attainment" name="education_attainment" required>
-                            <option value="1" <?= $constituent['education_attainment'] === '1' ? 'selected' : '' ?>>DAYCARE</option>
-                            <option value="2" <?= $constituent['education_attainment'] === '2' ? 'selected' : '' ?>>NURSERY SCHOOL</option>
-                            <option value="3" <?= $constituent['education_attainment'] === '3' ? 'selected' : '' ?>>KINDERGARTEN</option>
-                            <option value="4" <?= $constituent['education_attainment'] === '4' ? 'selected' : '' ?>>ELEMENTARY</option>
-                            <option value="5" <?= $constituent['education_attainment'] === '5' ? 'selected' : '' ?>>ALS HIGH SCHOOL</option>
-                            <option value="6" <?= $constituent['education_attainment'] === '6' ? 'selected' : '' ?>>HIGH SCHOOL</option>
-                            <option value="7" <?= $constituent['education_attainment'] === '7' ? 'selected' : '' ?>>JUNIOR HIGH</option>
-                            <option value="8" <?= $constituent['education_attainment'] === '8' ? 'selected' : '' ?>>SENIOR HIGH</option>
-                            <option value="9" <?= $constituent['education_attainment'] === '9' ? 'selected' : '' ?>>VOCATIONAL</option>
-                            <option value="10" <?= $constituent['education_attainment'] === '10' ? 'selected' : '' ?>>COLLEGE</option>
-                            <option value="11" <?= $constituent['education_attainment'] === '11' ? 'selected' : '' ?>>POST-GRAD</option>
-                        </select>
-                        <div class="invalid-feedback" id="education_attainment-feedback">
-                            <?= $errors['education_attainment'] ?? 'Please select highest educational attainment' ?>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <label for="is_graduate">Are you a graduate?</label>
-                        <div class="d-flex align-items-center">
-                            <div class="form-check mr-3">
-                                <input class="form-check-input" type="radio" name="is_graduate" id="is_graduate_yes"
-                                    value="YES" <?= $constituent['is_graduate'] === 'YES' ? 'checked' : '' ?> required>
-                                <label class="form-check-label" for="is_graduate_yes">Yes</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="is_graduate" id="is_graduate_no"
-                                    value="NO" <?= $constituent['is_graduate'] === 'NO' ? 'checked' : '' ?> required>
-                                <label class="form-check-label" for="is_graduate_no">No</label>
-                            </div>
-                        </div>
-                        <?php if (isset($errors['is_graduate'])): ?>
-                            <div class="invalid-feedback d-block">
-                                <?= $errors['is_graduate'] ?>
-                            </div>
-                        <?php endif; ?>
-                        <div class="invalid-feedback" id="is_graduate-feedback">
-                            Please select if constituent is a graduate
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <label for="occupation">Occupation</label>
-                        <select class="form-control <?= isset($errors['occupation']) ? 'is-invalid' : '' ?>" id="occupation" name="occupation">
-                            <option value=""></option>
-                            <option value="Government Employee" <?= $constituent['occupation'] === 'Government Employee' ? 'selected' : '' ?>>Government Employee</option>
-                            <option value="Private Employee" <?= $constituent['occupation'] === 'Private Employee' ? 'selected' : '' ?>>Private Employee</option>
-                            <option value="Barangay Official" <?= $constituent['occupation'] === 'Barangay Official' ? 'selected' : '' ?>>Barangay Official</option>
-                            <option value="Barangay Volunteers" <?= $constituent['occupation'] === 'Barangay Volunteers' ? 'selected' : '' ?>>Barangay Volunteers</option>
-                            <option value="OFW" <?= $constituent['occupation'] === 'OFW' ? 'selected' : '' ?>>OFW</option>
-                            <option value="Business" <?= $constituent['occupation'] === 'Business' ? 'selected' : '' ?>>Business</option>
-                            <option value="Carpenter" <?= $constituent['occupation'] === 'Carpenter' ? 'selected' : '' ?>>Carpenter</option>
-                            <option value="Laborer/Construction" <?= $constituent['occupation'] === 'Laborer/Construction' ? 'selected' : '' ?>>Laborer/Construction</option>
-                            <option value="Driver" <?= $constituent['occupation'] === 'Driver' ? 'selected' : '' ?>>Driver</option>
-                            <option value="Sari-Sari Store" <?= $constituent['occupation'] === 'Sari-Sari Store' ? 'selected' : '' ?>>Sari-Sari Store</option>
-                            <option value="Self-Employed" <?= $constituent['occupation'] === 'Self-Employed' ? 'selected' : '' ?>>Self-Employed</option>
-                        </select>
-                        <div class="invalid-feedback" id="occupation-feedback">
-                            <?= $errors['occupation'] ?? 'Please select occupation' ?>
+                        <div class="form-group">
+                            <label for="birthdate">Birthdate <span class="required">*</span></label>
+                            <input type="date" class="form-control <?= isset($errors['birthdate']) ? 'is-invalid' : '' ?>"
+                                id="birthdate" name="birthdate" required
+                                value="<?= htmlspecialchars($f('birthdate')) ?>" max="<?= date('Y-m-d') ?>">
+                            <div class="invalid-feedback"><?= $errors['birthdate'] ?? 'Please enter a valid birthdate' ?></div>
                         </div>
                     </div>
                 </div>
-                <div class="border rounded p-5 mt-3">
-                    <h5 class="font-weight-bold mb-3">Classifications</h5>
-                    <div class="row">
-                    <?php foreach ($classifications as $classification): ?>
-                        <div class="form-check col-md-6">
-                            <div class="d-flex flex-column">
-                                <?php 
-                                    $isChecked = isset($classificationData[$classification['id']]);
-                                    $orgId = $isChecked ? $classificationData[$classification['id']]['org_id'] : '';
-                                    $inputDisplayClass = $isChecked ? '' : 'd-none';
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="birthplace">Birth Place <span class="required">*</span></label>
+                            <input type="text" class="form-control <?= isset($errors['birthplace']) ? 'is-invalid' : '' ?>"
+                                id="birthplace" name="birthplace" placeholder="Tacloban City" required
+                                value="<?= htmlspecialchars($f('birthplace')) ?>">
+                            <div class="invalid-feedback"><?= $errors['birthplace'] ?? 'Please enter a valid birth place' ?></div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="civil_status">Civil Status <span class="required">*</span></label>
+                            <select class="form-control <?= isset($errors['civil_status']) ? 'is-invalid' : '' ?>"
+                                id="civil_status" name="civil_status" required>
+                                <option value="">Select civil status</option>
+                                <?php foreach (['SINGLE'=>'Single','MARRIED'=>'Married','WIDOWED'=>'Widowed','SEPARATED'=>'Separated','DIVORCED'=>'Divorced'] as $val => $label): ?>
+                                    <option value="<?= $val ?>" <?= $f('civil_status') === $val ? 'selected' : '' ?>><?= $label ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <div class="invalid-feedback"><?= $errors['civil_status'] ?? 'Please select your civil status' ?></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="religion">Religion <span class="required">*</span></label>
+                            <select class="form-control <?= isset($errors['religion']) ? 'is-invalid' : '' ?>"
+                                id="religion" name="religion" required>
+                                <option value="">Select religion</option>
+                                <?php
+                                $religions = [
+                                    'ROMAN CATHOLIC'        => 'Roman Catholic',
+                                    'PROTESTANT'            => 'Protestant',
+                                    'IGLESIA NI CRISTO'     => 'Iglesia ni Cristo',
+                                    'BORN AGAIN'            => 'Born Again',
+                                    'SEVENTH DAY ADVENTIST' => 'Seventh Day Adventist',
+                                    'ISLAM'                 => 'Islam',
+                                    'BAPTIST'               => 'Baptist',
+                                    "JEHOVAH'S WITNESS"     => "Jehovah's Witness",
+                                    'BUDDHISM'              => 'Buddhism',
+                                    'HINDUISM'              => 'Hinduism',
+                                    'OTHERS'                => 'Others',
+                                ];
+                                foreach ($religions as $val => $label):
                                 ?>
-                                <input class="form-check-input" type="checkbox" name="classifications[]"
-                                    id="<?= strtolower($classification['id']) ?>" value="<?= $classification['id'] ?>"
+                                    <option value="<?= $val ?>" <?= $f('religion') === $val ? 'selected' : '' ?>><?= $label ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <div class="invalid-feedback"><?= $errors['religion'] ?? 'Please select your religion' ?></div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="citizenship">Citizenship <span class="required">*</span></label>
+                            <select class="form-control <?= isset($errors['citizenship']) ? 'is-invalid' : '' ?>"
+                                id="citizenship" name="citizenship" required onchange="toggleCitizenshipOthers(this)">
+                                <option value="">Select citizenship</option>
+                                <option value="FILIPINO" <?= $citizenshipVal === 'FILIPINO' ? 'selected' : '' ?>>Filipino</option>
+                                <option value="OTHERS"   <?= $isOthers ? 'selected' : '' ?>>Others</option>
+                            </select>
+                            <div class="invalid-feedback"><?= $errors['citizenship'] ?? 'Please select your citizenship' ?></div>
+
+                            <div class="mt-2 <?= $isOthers ? '' : 'd-none' ?>" id="citizenship-others-container">
+                                <input type="text"
+                                    class="form-control <?= isset($errors['citizenship_others']) ? 'is-invalid' : '' ?>"
+                                    id="citizenship_others" name="citizenship_others"
+                                    placeholder="Please specify citizenship"
+                                    value="<?= htmlspecialchars($citizenshipOthersValue) ?>">
+                                <div class="invalid-feedback"><?= $errors['citizenship_others'] ?? 'Please specify your citizenship' ?></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="form-card">
+                <div class="section-header">
+                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+                    </svg>
+                    <h5>Contact Information</h5>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="contact">Contact Number</label>
+                            <input type="text" class="form-control <?= isset($errors['contact']) ? 'is-invalid' : '' ?>"
+                                id="contact" name="contact"
+                                value="<?= htmlspecialchars($f('contact')) ?>"
+                                placeholder="09123456789" pattern="(\+63|0)\d{10}">
+                            <div class="invalid-feedback"><?= $errors['contact'] ?? 'Please enter a valid Philippine phone number' ?></div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" class="form-control <?= isset($errors['email']) ? 'is-invalid' : '' ?>"
+                                id="email" name="email"
+                                value="<?= htmlspecialchars($f('email')) ?>"
+                                placeholder="juan@example.com">
+                            <div class="invalid-feedback"><?= $errors['email'] ?? 'Please enter a valid email address' ?></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Education & Employment -->
+            <div class="form-card">
+                <div class="section-header">
+                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"/>
+                    </svg>
+                    <h5>Education & Employment</h5>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="education_attainment">Highest Educational Attainment <span class="required">*</span></label>
+                            <select class="form-control <?= isset($errors['education_attainment']) ? 'is-invalid' : '' ?>"
+                                id="education_attainment" name="education_attainment" required>
+                                <option value="">Select educational attainment</option>
+                                <?php
+                                // FIX: cast both sides to string — PDO can return int from DB,
+                                // causing strict === to silently fail and show blank selection.
+                                $currentEdu = (string)$f('education_attainment');
+                                foreach ($educationLevels as $val => $label):
+                                ?>
+                                    <option value="<?= $val ?>" <?= $currentEdu === (string)$val ? 'selected' : '' ?>>
+                                        <?= $label ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <div class="invalid-feedback"><?= $errors['education_attainment'] ?? 'Please select your educational attainment' ?></div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label>Are you a graduate? <span class="required">*</span></label>
+                            <div class="custom-radio-group">
+                                <div class="custom-radio">
+                                    <input type="radio" name="is_graduate" id="is_graduate_yes" value="YES"
+                                        <?= $f('is_graduate') === 'YES' ? 'checked' : '' ?> required>
+                                    <label for="is_graduate_yes">Yes</label>
+                                </div>
+                                <div class="custom-radio">
+                                    <input type="radio" name="is_graduate" id="is_graduate_no" value="NO"
+                                        <?= $f('is_graduate') === 'NO' ? 'checked' : '' ?> required>
+                                    <label for="is_graduate_no">No</label>
+                                </div>
+                            </div>
+                            <?php if (isset($errors['is_graduate'])): ?>
+                                <div class="invalid-feedback d-block"><?= $errors['is_graduate'] ?></div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="occupation">Occupation</label>
+                            <select class="form-control <?= isset($errors['occupation']) ? 'is-invalid' : '' ?>"
+                                id="occupation" name="occupation">
+                                <option value="">Select occupation</option>
+                                <?php
+                                $occupations = [
+                                    'Government Employee',
+                                    'Private Employee',
+                                    'Barangay Official',
+                                    'Barangay Volunteers',
+                                    'OFW',
+                                    'Business',
+                                    'Carpenter',
+                                    'Laborer/Construction',
+                                    'Driver',
+                                    'Self-Employed',
+                                    'Student',            // ADDED
+                                    'Homemaker/Housewife', // ADDED
+                                ];
+                                foreach ($occupations as $occ):
+                                ?>
+                                    <option value="<?= $occ ?>" <?= $f('occupation') === $occ ? 'selected' : '' ?>><?= $occ ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <div class="invalid-feedback"><?= $errors['occupation'] ?? 'Please select your occupation' ?></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Classifications -->
+            <div class="form-card">
+                <div class="section-header">
+                    <svg width="24" height="24" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
+                        <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/>
+                    </svg>
+                    <h5>Classifications</h5>
+                </div>
+
+                <div class="classification-grid">
+                    <?php foreach ($classifications as $classification): ?>
+                        <?php
+                        $isChecked       = isset($classificationData[$classification['id']]);
+                        $orgId           = $isChecked ? ($classificationData[$classification['id']]['org_id'] ?? '') : '';
+                        $hasOrganization = !empty($classification['organization']);
+                        $itemClass       = $isChecked ? 'classification-item checked' : 'classification-item';
+                        ?>
+                        <div class="<?= $itemClass ?>" id="classification-item-<?= $classification['id'] ?>">
+                            <div class="classification-checkbox">
+                                <input type="checkbox" name="classifications[]"
+                                    id="classification_<?= $classification['id'] ?>"
+                                    value="<?= $classification['id'] ?>"
                                     <?= $isChecked ? 'checked' : '' ?>
-                                    onchange="toggleInputField(this, '<?= strtolower($classification['id']) ?>InputId');">
-                                <label class="form-check-label" for="<?= strtolower($classification['id']) ?>">
-                                    <?= $classification['name'] ?>
+                                    <?php if ($hasOrganization): ?>
+                                        onchange="toggleClassificationInput(this, <?= $classification['id'] ?>)"
+                                    <?php endif; ?>>
+                                <label for="classification_<?= $classification['id'] ?>">
+                                    <?= htmlspecialchars($classification['name']) ?>
                                 </label>
-                                <div>
-                                    <input type="text" class="form-control mb-2 <?= $inputDisplayClass ?> <?= isset($errors['classification_org_ids'][$classification['id']]) ? 'is-invalid' : '' ?>"
-                                        id="<?= strtolower($classification['id']) ?>InputId"
+                            </div>
+
+                            <?php if ($hasOrganization): ?>
+                                <div class="classification-id-input <?= $isChecked ? '' : 'd-none' ?>"
+                                    id="classification-input-<?= $classification['id'] ?>">
+                                    <input type="text"
+                                        class="form-control form-control-sm <?= isset($errors['classification_org_ids'][$classification['id']]) ? 'is-invalid' : '' ?>"
                                         name="classification_org_ids[<?= $classification['id'] ?>]"
-                                        placeholder="<?= $classification['code'] ?> ID No." 
-                                        value="<?= $orgId ?>">
+                                        placeholder="<?= htmlspecialchars($classification['code']) ?> ID Number"
+                                        value="<?= htmlspecialchars($orgId) ?>">
                                     <?php if (isset($errors['classification_org_ids'][$classification['id']])): ?>
                                         <div class="invalid-feedback">
-                                            <?= $errors['classification_org_ids'][$classification['id']] ?>
+                                            <?= htmlspecialchars($errors['classification_org_ids'][$classification['id']]) ?>
                                         </div>
                                     <?php endif; ?>
                                 </div>
-                            </div>
+                            <?php endif; ?>
                         </div>
                     <?php endforeach; ?>
-                    </div>
                 </div>
-                <div class="d-flex justify-content-center mt-4">
-                    <button type="submit" class="btn btn-primary px-4">Update</button>
-                </div>
-            </form>
+            </div>
+
+            <!-- Submit -->
+            <div class="submit-section">
+                <button type="submit" class="btn btn-submit" id="submitBtn">
+                    Update Constituent
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<!-- ── Error Modal ── -->
+<div class="error-modal-overlay" id="errorModal" role="dialog" aria-modal="true" aria-labelledby="errorModalTitle">
+    <div class="error-modal">
+        <div class="error-modal-header">
+            <div class="error-modal-icon">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                </svg>
+            </div>
+            <div class="error-modal-header-text">
+                <h6 id="errorModalTitle">Error</h6>
+                <span>Please review the details below</span>
+            </div>
+            <button class="error-modal-close" onclick="closeErrorModal()" aria-label="Close">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+        <div class="error-modal-body">
+            <p id="errorModalMessage"></p>
+            <p id="errorModalDetail" class="error-modal-detail" style="display:none;"></p>
+        </div>
+        <div class="error-modal-footer">
+            <button class="error-modal-btn" onclick="closeErrorModal()">
+                Got it
+            </button>
         </div>
     </div>
+</div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('constituentForm');
-        const formInputs = form.querySelectorAll('input, select');
-        
-        // Setup validation for each input
-        formInputs.forEach(input => {
-            input.addEventListener('input', function() {
-                validateInput(input);
-            });
-            
-            input.addEventListener('change', function() {
-                validateInput(input);
-            });
-            
-            // Initial validation on page load
-            if (input.value) {
-                validateInput(input);
-            }
-        });
-        
-        // PSN specific validation (numbers only)
-        const psnInput = document.getElementById('psn');
-        psnInput.addEventListener('input', function(e) {
-            this.value = this.value.replace(/[^0-9]/g, '');
-            validateInput(this);
-        });
-        
-        // Name fields validation (letters, spaces, hyphens, apostrophes only)
-        const nameFields = ['last_name', 'first_name', 'middle_name'];
-        nameFields.forEach(field => {
-            const input = document.getElementById(field);
-            if (input) {
-                input.addEventListener('input', function() {
-                    if (this.value && !/^[A-Za-z\s\-']+$/.test(this.value)) {
-                        this.value = this.value.replace(/[^A-Za-z\s\-']/g, '');
-                    }
-                    validateInput(this);
-                });
-            }
-        });
-        
-        // Contact field validation
-        const contactInput = document.getElementById('contact');
-        contactInput.addEventListener('input', function(e) {
-            this.value = this.value.replace(/[^0-9+]/g, '');
-            validateInput(this);
-        });
-        
-        // Form submission validation
-        form.addEventListener('submit', function(event) {
-            let isValid = true;
-            
-            // Validate all inputs before submission
-            formInputs.forEach(input => {
-                if (!validateInput(input)) {
-                    isValid = false;
-                }
-            });
-            
-            // Prevent form submission if validation fails
-            if (!isValid) {
-                event.preventDefault();
-                // Scroll to the first invalid field
-                const firstInvalid = form.querySelector('.is-invalid');
-                if (firstInvalid) {
-                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    firstInvalid.focus();
-                }
-            }
-        });
-        
-        // Helper function to validate a single input
-        function validateInput(input) {
-            let isValid = true;
-            
-            // Clear previous validation state
-            input.classList.remove('is-invalid', 'is-valid');
-            
-            // Skip validation for non-required empty fields
-            if (!input.required && !input.value) {
-                return true;
-            }
-            
-            // Check required fields
-            if (input.required && !input.value) {
-                isValid = false;
-            }
-            
-            // Validate patterns for text inputs
-            if (input.pattern && input.value) {
-                const pattern = new RegExp(input.pattern);
-                if (!pattern.test(input.value)) {
-                    isValid = false;
-                }
-            }
-            
-            // Radio button validation
-            if (input.type === 'radio' && input.required) {
-                const radioGroup = document.querySelectorAll(`input[name="${input.name}"]`);
-                isValid = Array.from(radioGroup).some(radio => radio.checked);
-                
-                // Apply the validation result to all radios in the group
-                if (isValid) {
-                    radioGroup.forEach(radio => {
-                        radio.classList.remove('is-invalid');
-                        radio.classList.add('is-valid');
-                    });
-                    
-                    // Hide feedback for the entire radio group
-                    const feedbackElement = document.getElementById(`${input.name}-feedback`);
-                    if (feedbackElement) {
-                        feedbackElement.style.display = 'none';
-                    }
-                    return true;
-                } else {
-                    radioGroup.forEach(radio => {
-                        radio.classList.add('is-invalid');
-                    });
-                    
-                    // Show feedback for the entire radio group
-                    const feedbackElement = document.getElementById(`${input.name}-feedback`);
-                    if (feedbackElement) {
-                        feedbackElement.style.display = 'block';
-                    }
-                    return false;
-                }
-            }
-            
-            // Email validation
-            if (input.type === 'email' && input.value) {
-                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailPattern.test(input.value)) {
-                    isValid = false;
-                }
-            }
-            
-            // Date validation
-            if (input.type === 'date' && input.value) {
-                const selectedDate = new Date(input.value);
-                const today = new Date();
-                if (selectedDate > today) {
-                    isValid = false;
-                }
-            }
-            
-            // Add appropriate feedback
-            if (!isValid) {
-                input.classList.add('is-invalid');
-                
-                // For radio buttons, show feedback - This is now handled in the radio button validation section above
-                if (input.type === 'radio') {
-                    return false; // Return early as we now handle radio buttons above
-                }
-            } else {
-                input.classList.add('is-valid');
-            }
-            
-            return isValid;
-        }
-    });
+<script src="public/assets/js/constituent_edit.js"></script>
 
-    function toggleInputField(checkbox, inputId) {
-        const inputField = document.getElementById(inputId);
-        if (checkbox.checked) {
-            inputField.classList.remove('d-none');
-            // Validate the input field if it becomes visible
-            validateInput(inputField);
-        } else {
-            inputField.classList.add('d-none');
-            // Clear validation state when hidden
-            inputField.classList.remove('is-invalid', 'is-valid');
-        }
-    }
-    
-    // Helper function for the toggleInputField function
-    function validateInput(input) {
-        if (!input) return true;
-        
-        let isValid = true;
-        
-        // Clear previous validation state
-        input.classList.remove('is-invalid', 'is-valid');
-        
-        // Skip validation for non-required empty fields
-        if (!input.required && !input.value) {
-            return true;
-        }
-        
-        // Check required fields
-        if (input.required && !input.value) {
-            isValid = false;
-        }
-        
-        // Validate patterns
-        if (input.pattern && input.value) {
-            const pattern = new RegExp(input.pattern);
-            if (!pattern.test(input.value)) {
-                isValid = false;
-            }
-        }
-        
-        // Add appropriate feedback
-        if (!isValid) {
-            input.classList.add('is-invalid');
-        } else {
-            input.classList.add('is-valid');
-        }
-        
-        return isValid;
-    }
-</script>
 <?php
 $content = ob_get_clean();
 require_once 'app/Views/layouts/main.php';

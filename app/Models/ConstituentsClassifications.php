@@ -76,7 +76,7 @@ class ConstituentsClassifications
         }
     }
 
-    public function getTotalNumberofConstituentsWithSpecifiedClassifications()
+   public function getTotalNumberofConstituentsWithSpecifiedClassifications()
     {
         $query = "
             SELECT 
@@ -90,40 +90,68 @@ class ConstituentsClassifications
             JOIN 
                 classifications cl ON cc.classification_id = cl.id
             WHERE 
-                cl.code IN ('OSY', 'PWD', 'SC')
+                cl.code IN ('OSY', 'PWD', 'SC', 'SOLOPARENT', 'OSC', 'IP', 'OFW', 'UNEMP', 'LABOR', 'STUDENT')
                 AND c.removed_at IS NULL
             GROUP BY 
                 cl.code, c.sex
             ORDER BY 
                 cl.code, c.sex
         ";
-        
+
         $stmt = $this->db->connect()->prepare($query);
         $stmt->execute();
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        // Restructure data for easier consumption
+
+        // ADD new codes to default data structure
         $data = [
-            'OSY' => ['MALE' => 0, 'FEMALE' => 0, 'total' => 0],
-            'PWD' => ['MALE' => 0, 'FEMALE' => 0, 'total' => 0],
-            'SC' => ['MALE' => 0, 'FEMALE' => 0, 'total' => 0]
+            'OSY'        => ['MALE' => 0, 'FEMALE' => 0, 'total' => 0],
+            'PWD'        => ['MALE' => 0, 'FEMALE' => 0, 'total' => 0],
+            'SC'         => ['MALE' => 0, 'FEMALE' => 0, 'total' => 0],
+            'SOLOPARENT' => ['MALE' => 0, 'FEMALE' => 0, 'total' => 0],
+            'OSC'        => ['MALE' => 0, 'FEMALE' => 0, 'total' => 0],
+            'IP'         => ['MALE' => 0, 'FEMALE' => 0, 'total' => 0],
+            'OFW'        => ['MALE' => 0, 'FEMALE' => 0, 'total' => 0], // ADD
+            'UNEMP'      => ['MALE' => 0, 'FEMALE' => 0, 'total' => 0], // ADD
+            'LABOR'      => ['MALE' => 0, 'FEMALE' => 0, 'total' => 0],
+            'STUDENT'    => ['MALE' => 0, 'FEMALE' => 0, 'total' => 0] // ADD
         ];
-        
-        // Fill in the actual counts
+
         foreach ($results as $row) {
-            $code = $row['classification_code'];
-            $sex = $row['sex'];
+            $code  = $row['classification_code'];
+            $sex   = $row['sex'];
             $count = (int)$row['total'];
-            
+
             if (isset($data[$code])) {
-                $data[$code][$sex] = $count;
+                $data[$code][$sex]    = $count;
                 $data[$code]['total'] += $count;
             }
         }
-        
+
         return $data;
     }
+    public function getConstituentsByClassificationId(int $classificationId): array
+    {
+        $query = "
+            SELECT 
+                c.*,
+                TRIM(CONCAT(
+                    c.first_name, ' ',
+                    COALESCE(CONCAT(c.middle_name, ' '), ''),
+                    c.last_name,
+                    COALESCE(CONCAT(' ', c.suffix), '')
+                )) AS full_name
+            FROM constituents c
+            INNER JOIN {$this->table} cc ON cc.constituent_id = c.id
+            WHERE cc.classification_id = :classification_id
+            AND c.removed_at IS NULL
+            ORDER BY c.last_name ASC, c.first_name ASC
+        ";
 
+        $stmt = $this->db->connect()->prepare($query);
+        $stmt->bindParam(':classification_id', $classificationId, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
     public function getTotalSeniorCitizens()
     {
         $query = "

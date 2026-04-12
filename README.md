@@ -47,7 +47,7 @@ The **Barangay Profiling System** is a web-based application designed to streaml
 2. **Setup the Database**:
 
 - Create a MySQL database.
-- Import the provided SQL file (`db2.sql`) into your database.
+- Import the provided SQL file (`re_bps.sql`) into your database.
 
 3. **Configure the Application**:
 Open the database.php file and update the database connection details:

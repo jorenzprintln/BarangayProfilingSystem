@@ -20,6 +20,7 @@ $content = ob_start();
                     <?php endif; ?>
                     
                     <form action="index.php?controller=households&action=store" method="POST">
+                        <input type="hidden" name="_csrf_token" value="<?= Session::generateCsrfToken() ?>">
                         <div class="form-group">
                             <label for="household_number">Household Number</label>
                             <input type="text" class="form-control" id="household_number" name="household_number"

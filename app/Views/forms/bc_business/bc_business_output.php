@@ -20,7 +20,6 @@ class PDF extends FPDF
         $y = ($this->h - $imageHeight) + 20;
         $this->Image('app/Views/forms/assets/doc_bg1.png', $x, $y, $imageWidth);
 
-
         $this->Image('app/Views/forms/assets/brgy_logo.png', 35, 20, 25.4, 25.4);
 
         // Add right logo with size set to 1 inch (25.4 mm)
@@ -73,7 +72,6 @@ class PDF extends FPDF
 
         $this->Write(10, "           THIS CERTIFICATION is being issued upon the request of the interested party for whatever legal purpose it may serve.");
 
-
         $this->Ln(15); // Add a line break
         // Add the new content with the date
         $this->Write(10, "           ISSUED this ");
@@ -105,14 +103,7 @@ $pdf->generateCertificate($bname, $tob, $bo, $location, $date, $punongBarangay);
 // Save the PDF to the file system
 $pdf->Output('F', $filePath);
 
-// Also display the PDF to the user (optional)
+// Display the PDF to the user in new tab
 ob_end_clean();
 $pdf->Output('I', 'Barangay_Business_Certificate.pdf');
 exit;
-
-// Display a success message to the user
-echo "<div style='text-align: center; margin-top: 20px;'>";
-echo "<h3>Certificate generated successfully!</h3>";
-echo "<p>Your certificate has been saved as: <strong>$filename</strong></p>";
-echo "<p>You can download it <a href='/$filePath' target='_blank'>here</a>.</p>";
-echo "</div>";

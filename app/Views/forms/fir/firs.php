@@ -1,5 +1,4 @@
 <?php
-// Suppress warnings and notices to prevent output before PDF
 error_reporting(0);
 
 require 'vendor/fpdf186/fpdf.php';
@@ -224,8 +223,6 @@ class PDF extends FPDF
         }
         $youthTotal = $youthMale + $youthFemale;
 
-        // The rest of the tables still use random data since we don't have real data for these categories
-
         // OSY row
         $osyMale = $totalConstituentsWithSpecifiedClassification['OSY']['MALE'];
         $osyFemale = $totalConstituentsWithSpecifiedClassification['OSY']['FEMALE'];
@@ -250,7 +247,7 @@ class PDF extends FPDF
         $this->Cell(35, 5, $pwdFemale, 1, 0, 'C');
         $this->Cell(35, 5, $pwdTotal, 1, 1, 'C');
 
-        // Senior Citizen row - use old dependents data
+        // Senior Citizen row
         $scMale = $totalConstituentsWithSpecifiedClassification['SC']['MALE'];
         $scFemale = $totalConstituentsWithSpecifiedClassification['SC']['FEMALE'];
         $scTotal = $totalConstituentsWithSpecifiedClassification['SC']['total'];
@@ -259,12 +256,72 @@ class PDF extends FPDF
         $this->Cell(35, 5, $scFemale, 1, 0, 'C');
         $this->Cell(35, 5, $scTotal, 1, 1, 'C');
 
+        // Solo Parent row
+        $spMale   = $totalConstituentsWithSpecifiedClassification['SOLOPARENT']['MALE']   ?? 0;
+        $spFemale = $totalConstituentsWithSpecifiedClassification['SOLOPARENT']['FEMALE'] ?? 0;
+        $spTotal  = $totalConstituentsWithSpecifiedClassification['SOLOPARENT']['total']  ?? 0;
+        $this->Cell(60, 5, 'Solo Parent', 1, 0, 'L');
+        $this->Cell(35, 5, $spMale,   1, 0, 'C');
+        $this->Cell(35, 5, $spFemale, 1, 0, 'C');
+        $this->Cell(35, 5, $spTotal,  1, 1, 'C');
 
+        // OSC row
+        $oscMale   = $totalConstituentsWithSpecifiedClassification['OSC']['MALE']   ?? 0;
+        $oscFemale = $totalConstituentsWithSpecifiedClassification['OSC']['FEMALE'] ?? 0;
+        $oscTotal  = $totalConstituentsWithSpecifiedClassification['OSC']['total']  ?? 0;
+        $this->Cell(60, 5, 'Out of School Children (OSC)', 1, 0, 'L');
+        $this->Cell(35, 5, $oscMale,   1, 0, 'C');
+        $this->Cell(35, 5, $oscFemale, 1, 0, 'C');
+        $this->Cell(35, 5, $oscTotal,  1, 1, 'C');
+
+        // IP row
+        $ipMale   = $totalConstituentsWithSpecifiedClassification['IP']['MALE']   ?? 0;
+        $ipFemale = $totalConstituentsWithSpecifiedClassification['IP']['FEMALE'] ?? 0;
+        $ipTotal  = $totalConstituentsWithSpecifiedClassification['IP']['total']  ?? 0;
+        $this->Cell(60, 5, 'Indigenous People (IP)', 1, 0, 'L');
+        $this->Cell(35, 5, $ipMale,   1, 0, 'C');
+        $this->Cell(35, 5, $ipFemale, 1, 0, 'C');
+        $this->Cell(35, 5, $ipTotal,  1, 1, 'C');
+
+        // OFW row
+        $ofwMale   = $totalConstituentsWithSpecifiedClassification['OFW']['MALE']   ?? 0;
+        $ofwFemale = $totalConstituentsWithSpecifiedClassification['OFW']['FEMALE'] ?? 0;
+        $ofwTotal  = $totalConstituentsWithSpecifiedClassification['OFW']['total']  ?? 0;
+        $this->Cell(60, 5, 'OFW', 1, 0, 'L');
+        $this->Cell(35, 5, $ofwMale,   1, 0, 'C');
+        $this->Cell(35, 5, $ofwFemale, 1, 0, 'C');
+        $this->Cell(35, 5, $ofwTotal,  1, 1, 'C');
+
+        // Unemployed row
+        $unempMale   = $totalConstituentsWithSpecifiedClassification['UNEMP']['MALE']   ?? 0;
+        $unempFemale = $totalConstituentsWithSpecifiedClassification['UNEMP']['FEMALE'] ?? 0;
+        $unempTotal  = $totalConstituentsWithSpecifiedClassification['UNEMP']['total']  ?? 0;
+        $this->Cell(60, 5, 'Unemployed', 1, 0, 'L');
+        $this->Cell(35, 5, $unempMale,   1, 0, 'C');
+        $this->Cell(35, 5, $unempFemale, 1, 0, 'C');
+        $this->Cell(35, 5, $unempTotal,  1, 1, 'C');
+
+        // Labor/Employed row
+        $laborMale   = $totalConstituentsWithSpecifiedClassification['LABOR']['MALE']   ?? 0;
+        $laborFemale = $totalConstituentsWithSpecifiedClassification['LABOR']['FEMALE'] ?? 0;
+        $laborTotal  = $totalConstituentsWithSpecifiedClassification['LABOR']['total']  ?? 0;
+        $this->Cell(60, 5, 'Labor/Employed', 1, 0, 'L');
+        $this->Cell(35, 5, $laborMale,   1, 0, 'C');
+        $this->Cell(35, 5, $laborFemale, 1, 0, 'C');
+        $this->Cell(35, 5, $laborTotal,  1, 1, 'C');
+
+        // Student row — sourced from occupation counts
+        $studentMale   = $totalConstituentsByOccupation['Student']['MALE']   ?? 0;
+        $studentFemale = $totalConstituentsByOccupation['Student']['FEMALE'] ?? 0;
+        $studentTotal  = $totalConstituentsByOccupation['Student']['total']  ?? 0;
+        $this->Cell(60, 5, 'Student', 1, 0, 'L');
+        $this->Cell(35, 5, $studentMale,   1, 0, 'C');
+        $this->Cell(35, 5, $studentFemale, 1, 0, 'C');
+        $this->Cell(35, 5, $studentTotal,  1, 1, 'C');
 
         // Add some spacing
         $this->Ln(8);
 
-        // The rest of the code remains unchanged
         // Headers for Pregnant table
         $this->SetFont('Times', 'B', 12);
         $this->Cell(60, 5, 'PREGNANT', 1, 0, 'C');
@@ -273,24 +330,20 @@ class PDF extends FPDF
 
         $this->SetFont('Times', '', 12);
 
-        // 10-14 years old row - use form data
         $teen1Female = $formData['pregnant_10_14'] ?? 0;
         $this->Cell(60, 5, '10-14 yrs. old', 1, 0, 'L');
         $this->Cell(52.5, 5, $teen1Female, 1, 0, 'C');
         $this->Cell(52.5, 5, $teen1Female, 1, 1, 'C');
 
-        // 15-19 years old row - use form data
         $teen2Female = $formData['pregnant_15_19'] ?? 0;
         $this->Cell(60, 5, '15-19 yrs. old', 1, 0, 'L');
         $this->Cell(52.5, 5, $teen2Female, 1, 0, 'C');
         $this->Cell(52.5, 5, $teen2Female, 1, 1, 'C');
 
-        // 20 years and above row - use form data
         $adultFemale = $formData['pregnant_20_above'] ?? 0;
         $this->Cell(60, 5, '20-yrs old above', 1, 0, 'L');
         $this->Cell(52.5, 5, $adultFemale, 1, 0, 'C');
         $this->Cell(52.5, 5, $adultFemale, 1, 1, 'C');
-
 
         $this->Ln(8);
 
@@ -301,29 +354,23 @@ class PDF extends FPDF
 
         $this->SetFont('Times', '', 12);
 
-        // Total Population row - use actual total
         $this->Cell(120, 5, 'Total Population', 1, 0, 'L');
         $this->Cell(45, 5, number_format($totalAll), 1, 1, 'C');
 
-        // Total Households row
         $this->Cell(120, 5, 'Total No. of Household', 1, 0, 'L');
         $this->Cell(45, 5, number_format($totalHouseholds ?? 0), 1, 1, 'C');
 
-        // Total Families row
         $this->Cell(120, 5, 'Total No. of Families', 1, 0, 'L');
         $this->Cell(45, 5, number_format($totalFamilies ?? 0), 1, 1, 'C');
 
-        // Land Area row
         $landArea = 8.6;
         $this->Cell(120, 5, 'Land Area (Imelda Village and JPIC Terminal)', 1, 0, 'L');
         $this->Cell(45, 5, "$landArea ha.", 1, 1, 'C');
 
-        // Population Density row
         $density = round($totalAll / floatval($landArea), 2);
         $this->Cell(120, 5, 'Population Density', 1, 0, 'L');
         $this->Cell(45, 5, number_format($density, 2) . '/ha.', 1, 1, 'C');
 
-        // Families Residing 5 yrs and below row
         $this->Cell(120, 5, 'No. of Families Residing 5 yrs. and below', 1, 0, 'L');
         $this->Cell(45, 5, number_format($totalRecentFamilies ?? 0), 1, 1, 'C');
 
@@ -331,37 +378,35 @@ class PDF extends FPDF
 
         // Headers for Educational Level table
         $this->SetFont('Times', 'B', 12);
-        $this->Cell(55, 10, '', 1, 0, 'C'); // Empty cell for alignment
+        $this->Cell(55, 10, '', 1, 0, 'C');
         $this->Cell(36, 10, 'MALE', 1, 0, 'C');
         $this->Cell(36, 10, 'FEMALE', 1, 0, 'C');
         $this->Cell(38, 10, 'TOTAL', 1, 1, 'C');
 
-        // Store Y position after headers
         $startY = $this->GetY();
-
-        // Print HIGHEST EDUCATIONAL LEVEL header in the empty cell
         $this->SetY($startY - 10);
         $this->MultiCell(55, 5, "HIGHEST\nEDUCATIONAL LEVEL", 0, 'C');
         $this->SetY($startY);
 
         $this->SetFont('Times', '', 12);
 
-        // Educational level
         $levels = [
             'Daycare',
             'Nursery',
             'Kinder',
             'Elementary Level',
             'Elementary Graduate',
-            'ALS High School',
+            'ALS',
             'High School Level',
             'High School Graduate',
-            'Junior High',
-            'Senior High',
+            'Junior High School Level',
+            'Junior High School Graduate',
+            'Senior High School Level',
+            'Senior High School Graduate',
             'Vocational',
             'College Level',
             'College Graduate',
-            'Post Graduate'
+            'Post Graduate',
         ];
 
         $totalMale = 0;
@@ -380,7 +425,6 @@ class PDF extends FPDF
             $this->Cell(38, 5, number_format($total), 1, 1, 'C');
         }
 
-        // Grand Total row
         $this->SetFont('Times', 'B', 12);
         $this->Cell(55, 5, 'Grand Total', 1, 0, 'L');
         $this->Cell(36, 5, number_format($totalMale), 1, 0, 'C');
@@ -389,10 +433,8 @@ class PDF extends FPDF
 
         $this->Ln(8);
 
-        // Occupation Table Header
+        // Occupation Table
         $this->SetFont('Times', 'B', 12);
-
-        // Column Headers
         $this->Cell(55, 6, 'OCCUPATION', 1, 0, 'C');
         $this->Cell(36, 6, 'MALE', 1, 0, 'C');
         $this->Cell(36, 6, 'FEMALE', 1, 0, 'C');
@@ -400,7 +442,7 @@ class PDF extends FPDF
 
         $this->SetFont('Times', '', 12);
 
-        // Occupations array
+        // ── UPDATED: added Student and Homemaker/Housewife ──
         $occupations = [
             'Government Employee',
             'Private Employee',
@@ -412,26 +454,27 @@ class PDF extends FPDF
             'Laborer/Construction',
             'Driver',
             'Sari-Sari Store',
-            'Self-Employed'
+            'Self-Employed',
+            'Student',
+            'Homemaker/Housewife',
         ];
 
         $totalMale = 0;
         $totalFemale = 0;
 
         foreach ($occupations as $occupation) {
-            $male = $totalConstituentsByOccupation[$occupation]['MALE'];
-            $female = $totalConstituentsByOccupation[$occupation]['FEMALE'];
-            $total = $male + $female;
-            $totalMale += $male;
+            $male   = $totalConstituentsByOccupation[$occupation]['MALE']   ?? 0;
+            $female = $totalConstituentsByOccupation[$occupation]['FEMALE'] ?? 0;
+            $total  = $male + $female;
+            $totalMale   += $male;
             $totalFemale += $female;
 
             $this->Cell(55, 5, $occupation, 1, 0, 'L');
-            $this->Cell(36, 5, $male, 1, 0, 'C');
+            $this->Cell(36, 5, $male,   1, 0, 'C');
             $this->Cell(36, 5, $female, 1, 0, 'C');
             $this->Cell(38, 5, number_format($total), 1, 1, 'C');
         }
 
-        // Grand Total row
         $this->SetFont('Times', 'B', 12);
         $this->Cell(55, 5, 'Grand Total', 1, 0, 'L');
         $this->Cell(36, 5, number_format($totalMale), 1, 0, 'C');
@@ -443,26 +486,23 @@ class PDF extends FPDF
         $this->SetFont('Times', '', 12);
         $this->Cell(55, 5, 'Family Planning ACCEPTORS', 0, 0, 'L');
 
-        //add line space
         $this->Ln(8);
 
-        // Modern Methods Table Header
+        // Modern Methods Table
         $this->SetFont('Times', 'B', 12);
         $this->Cell(55, 6, '', 'TL', 0, 'L');
-
         $this->Cell(55, 6, 'METHOD', 1, 0, 'C');
         $this->Cell(55, 6, 'CURRENT USERS', 1, 1, 'C');
 
-        // Modern Methods Rows
         $this->SetFont('Times', '', 12);
         $modernMethods = [
-            'FS' => isset($formData['fp_fs']) ? $formData['fp_fs'] : 0,
-            'MS' => isset($formData['fp_ms']) ? $formData['fp_ms'] : 0,
-            'IUD' => isset($formData['fp_iud']) ? $formData['fp_iud'] : 0,
-            'PILL' => isset($formData['fp_pill']) ? $formData['fp_pill'] : 0,
-            'INJECTABLE' => isset($formData['fp_injectable']) ? $formData['fp_injectable'] : 0,
-            'IMPLANT' => isset($formData['fp_implant']) ? $formData['fp_implant'] : 0,
-            'CONDOM' => isset($formData['fp_condom']) ? $formData['fp_condom'] : 0
+            'FS'         => $formData['fp_fs']         ?? 0,
+            'MS'         => $formData['fp_ms']         ?? 0,
+            'IUD'        => $formData['fp_iud']        ?? 0,
+            'PILL'       => $formData['fp_pill']       ?? 0,
+            'INJECTABLE' => $formData['fp_injectable'] ?? 0,
+            'IMPLANT'    => $formData['fp_implant']    ?? 0,
+            'CONDOM'     => $formData['fp_condom']     ?? 0
         ];
 
         $isFirst = true;
@@ -470,25 +510,20 @@ class PDF extends FPDF
             $this->Cell(55, 6, ($isFirst) ? 'MODERN' : '', 'LR', 0, 'C');
             $this->Cell(55, 6, $method, 1, 0, 'L');
             $this->Cell(55, 6, $users, 1, 1, 'C');
-            if ($isFirst)
-                $isFirst = false;
+            if ($isFirst) $isFirst = false;
         }
-        // Bottom border for MODERN section
         $this->Cell(55, 0, '', 'T', 0, 'L');
         $this->Cell(110, 0, '', 0, 1, 'L');
 
-        // Natural Methods Header
-        $this->SetFont('Times', 'B', 12);
-
-        // Natural Methods Rows
+        // Natural Methods
         $this->SetFont('Times', '', 12);
         $naturalMethods = [
-            'CM' => isset($formData['fp_cm']) ? $formData['fp_cm'] : 0,
-            'BBT' => isset($formData['fp_bbt']) ? $formData['fp_bbt'] : 0,
-            'ST' => isset($formData['fp_st']) ? $formData['fp_st'] : 0,
-            'SD' => isset($formData['fp_sd']) ? $formData['fp_sd'] : 0,
-            'LAM' => isset($formData['fp_lam']) ? $formData['fp_lam'] : 0,
-            'Two Day' => isset($formData['fp_twoday']) ? $formData['fp_twoday'] : 0
+            'CM'      => $formData['fp_cm']     ?? 0,
+            'BBT'     => $formData['fp_bbt']    ?? 0,
+            'ST'      => $formData['fp_st']     ?? 0,
+            'SD'      => $formData['fp_sd']     ?? 0,
+            'LAM'     => $formData['fp_lam']    ?? 0,
+            'Two Day' => $formData['fp_twoday'] ?? 0
         ];
 
         $isFirst = true;
@@ -496,11 +531,8 @@ class PDF extends FPDF
             $this->Cell(55, 6, ($isFirst) ? 'NATURAL' : '', 'LR', 0, 'C');
             $this->Cell(55, 6, $method, 1, 0, 'L');
             $this->Cell(55, 6, $users, 1, 1, 'C');
-            if ($isFirst)
-                $isFirst = false;
+            if ($isFirst) $isFirst = false;
         }
-
-        // Bottom border for NATURAL section
         $this->Cell(55, 0, '', 'T', 0, 'L');
         $this->Cell(110, 0, '', 0, 1, 'L');
 
@@ -508,11 +540,10 @@ class PDF extends FPDF
 
         // Summary Statistics Table
         $this->SetFont('Times', '', 12);
-
         $summaryStats = [
-            'TOTAL CU' => isset($formData['fp_totalcu']) ? $formData['fp_totalcu'] : 0,
-            'MCRA' => isset($formData['fp_mcra']) ? $formData['fp_mcra'] : 0,
-            'CPR' => isset($formData['fp_cpr']) ? $formData['fp_cpr'] : 0
+            'TOTAL CU' => $formData['fp_totalcu'] ?? 0,
+            'MCRA'     => $formData['fp_mcra']    ?? 0,
+            'CPR'      => $formData['fp_cpr']     ?? 0
         ];
 
         foreach ($summaryStats as $label => $value) {
@@ -520,27 +551,24 @@ class PDF extends FPDF
             $this->Cell(55, 6, $value, 1, 1, 'C');
         }
 
-        $this->Ln(8);
+        $this->Ln(10);
 
+        $punongName = '';
+        if (is_array($punongBarangay) && isset($punongBarangay['full_name'])) {
+            $punongName = strtoupper($punongBarangay['full_name']);
+        } elseif (is_string($punongBarangay)) {
+            $punongName = strtoupper($punongBarangay);
+        }
+
+        // Names side by side
+        $this->SetFont('Times', 'UB', 12);
+        $this->Cell(83, 6, strtoupper($generatedBy ?? ''), 0, 0, 'L');
+        $this->Cell(0,  6, 'HON. ' . $punongName, 0, 1, 'R');
+
+        // Designations side by side
         $this->SetFont('Times', '', 11);
-        $this->Cell(110, 6, 'Prepared by:', 0, 1, 'L');
-
-
-        $this->SetFont('Times', 'BU', 12);
-        $this->Cell(0, 6, $generatedBy ?? '', 0, 1, 'L');
-
-        $this->SetFont('Times', '', 11);
-        $this->Cell(110, 6, 'Barangay Service Point Officer', 0, 1, 'L');
-
-        $this->Ln(8);
-
-        $this->Cell(110, 6, 'Approved by:', 0, 1, 'L');
-
-        $this->SetFont('Times', 'BU', 12);
-        $this->Cell(0, 6, $punongBarangay["full_name"] ?? '', 0, 1, 'L');
-
-        $this->SetFont('Times', '', 11);
-        $this->Cell(110, 6, 'Punong Barangay', 0, 1, 'L');
+        $this->Cell(83, 6, 'Barangay Service Point Officer', 0, 0, 'L');
+        $this->Cell(0,  6, 'Punong Barangay', 0, 1, 'R');
     }
 }
 

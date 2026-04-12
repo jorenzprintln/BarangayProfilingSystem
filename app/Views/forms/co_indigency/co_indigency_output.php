@@ -49,7 +49,7 @@ class PDF extends FPDF
         $this->MultiCell($this->w, 10, '', 0, 'J');
         $this->Write(10, '           THIS IS TO CERTIFY that ');
         $this->SetFont('Times', 'B', 12);
-        $this->Write(10, strtoupper($constituent['first_name'] . ' ' . $constituent['middle_name'] . ' ' . $constituent['last_name']));
+        $this->Write(10, strtoupper($constituent['first_name'] . ' ' . $constituent['middle_name'] . ' ' . $constituent['last_name'] . ' ' . ($constituent['suffix'] ?? '')));
         $this->SetFont('Times', '', 12);
         $this->Write(10, ', ');
         $this->Write(10, $age['age']);
@@ -57,24 +57,32 @@ class PDF extends FPDF
         $this->Write(10, $constituent['citizenship']);
         $this->Write(10, ', is a resident of Barangay 36-A, Imelda Village, Tacloban City, Leyte, is one of the bonafide residents in our barangay.');
         $this->Ln(10);
-        $this->Write(10, '               THIS CERTIFICATION is being issued upon the request of the above-mentioned person for the purpose of ');
+        $this->Write(10, '           THIS CERTIFICATION is being issued upon the request of the above-mentioned person for the purpose of ');
         $this->SetFont('Times', 'B', 12);
         $this->Write(10, strtoupper($purpose));
         $this->SetFont('Times', '', 12);
         $this->Ln(10);
 
-        $this->Write(10, '          Issued this ');
-        $this->SetFont('Times', 'B', 12);
+        $this->Write(10, '           Issued this ');
+        $this->SetFont('Times', 'B', 12);   
         $this->Write(10, $date);
         $this->SetFont('Times', '', 12);
-        $this->Write(10, ' at the office of the Punong Barangay, Barangay 36-A, Tacloban City, Leyte');
+        $this->Write(10, ' at the office of the Punong Barangay, Barangay 36-A, Tacloban City, Leyte.');
 
-        $this->Ln(30);
+        $this->Ln(50);
+
+        // FIXED: Extract and display Punong Barangay name on the right
+        $punongBarangayName = '';
+        if (is_array($punongBarangay) && isset($punongBarangay['full_name'])) {
+            $punongBarangayName = strtoupper($punongBarangay['full_name']);
+        } elseif (is_string($punongBarangay)) {
+            $punongBarangayName = strtoupper($punongBarangay);
+        }
 
         $this->SetFont('Times', 'UB', 12);
-        $this->Cell(0, 1, $punongBarangay['full_name'] ?? '                                                                    ', 0, 1, 'L');   
+        $this->Cell(0, 6, 'HON. ' . $punongBarangayName, 0, 1, 'R');
         $this->SetFont('Times', '', 12);
-        $this->Cell(0, 10, 'Punong Barangay', 0, 1, 'L');
+        $this->Cell(0, 6, 'Punong Barangay', 0, 1, 'R');
     }
 }
 
