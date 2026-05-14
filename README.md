@@ -40,7 +40,7 @@ The **Barangay Profiling System** is a web-based application designed to streaml
 
 1. **Clone the Repository**: Paste this into powershell or cmd
    ```bash
-   git clone https://github.com/your-repo/barangay-profiling-system.git
+   git clone https://github.com/jorenzprintln/BarangayProfilingSystem
    cd barangay-profiling-system
    ```
    
@@ -62,7 +62,7 @@ Open the database.php file and update the database connection details:
 
 4. **Deploy the Application**:
 Move the project folder to your web server's root directory (e.g., htdocs for XAMPP or www for WAMP/Laragon).
-Access the application via your browser: <http://localhost/barangay-profiling-system>.
+Access the application via your browser: <http://localhost/barangay_system>.
 
 ---
 
@@ -104,6 +104,6 @@ We welcome contributions to improve the Barangay Profiling System! If you'd like
 ## Contact
 For questions, suggestions, or support, please contact:
 
-**Email**: <rayoryanchristian@gmail.com> or <seandavenn@gmail.com>
+**Email**: <rayoryanchristian@gmail.com> or <seandavenn@gmail.com> or <jorenzpablo@gmail.com>
 
 Thank you for using the Barangay Profiling System! We hope it helps streamline your barangay management tasks.
